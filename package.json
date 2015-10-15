@@ -1,0 +1,8 @@
+{
+  "name": "tangojs-web-components",
+  "version": "0.1.0",
+  "dependencies": {
+    "tangojs": "^0.1.0",
+    "tangojs-connector-local": "^0.1.0"
+  }
+}

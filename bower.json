@@ -1,0 +1,27 @@
+{
+  "name": "tangojs-web-components",
+  "version": "0.1.0",
+  "authors": [
+    "mliszcz <liszcz.michal@gmail.com>"
+  ],
+  "description": "Web components for TangoJS.",
+  "main": "",
+  "moduleType": [],
+  "keywords": [
+    "tangojs"
+  ],
+  "license": "MIT",
+  "homepage": "",
+  "ignore": [
+    "**/.*",
+    "node_modules",
+    "bower_components",
+    "test",
+    "tests"
+  ],
+  "dependencies": {
+    "polymer": "Polymer/polymer#^1.1.0",
+    "webcomponentsjs": "^0.7.0",
+    "firefox-HTMLImports-patch": "https://gist.github.com/d11ea630cc777012d69b.git"
+  }
+}
