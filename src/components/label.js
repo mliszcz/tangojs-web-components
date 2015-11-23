@@ -1,10 +1,12 @@
 (function (window) {
   'use strict'
 
-  var document = window.document
+  /*
+  why ctor is not called:
+  https://www.polymer-project.org/1.0/docs/devguide/registering-elements.html#custom-constructor
+  */
 
-  // @see http://www.polymer-project.org/platform/html-imports.html
-  // @see https://groups.google.com/d/topic/polymer-dev/4UKty9tb1-s/discussion
+  var document = window.document
   var currentDocument =
     (document._currentScript || document.currentScript).ownerDocument
 
@@ -12,10 +14,11 @@
 
   class TangoJsLabelElement extends window.TangoJsElement {
 
-    constructor() {
-      // FIXME why not called? probably related to:
-      // https://www.polymer-project.org/1.0/docs/devguide/registering-elements.html#custom-constructor
-      window.console.log('constructor')
+    constructor() { }
+
+    createdCallback() {
+      this.createInnerDOM()
+      this.setupAttributes()
     }
 
     /** @private */
@@ -29,6 +32,7 @@
     setupAttributes() {
       this.model = this.getAttribute('model') || undefined
       this.poll = parseInt(this.getAttribute('poll') || '1000')
+      this.setAttribute('title', this.model)
     }
 
     /** @private */
@@ -43,34 +47,34 @@
       }
 
       var names = this._model.match(/^(.+)\/([A-Za-z0-9_]+)$/)
-      this._deviceProxy = new window.tangojs.DeviceProxy(names[1])
-      this._attributeProxy = this._deviceProxy.createDeviceAttribute(names[2])
 
-      this._attributeProxy.readInfo().then(result => {
+      this._deviceProxy = new window.tangojs.proxy.DeviceProxy(names[1])
+      this._attributeProxy = new window.tangojs.proxy.AttributeProxy(names[1],
+                                                                     names[2])
 
-        this._root.getElementById('name').textContent = result._info.name
-        this._root.getElementById('unit').textContent = result._info.unit
+      this._attributeProxy.get_info().then(attributeInfo => {
+
+        this._root.getElementById('name').textContent = attributeInfo.name
+        this._root.getElementById('unit').textContent = attributeInfo.unit
 
         var valueElement = this._root.getElementById('value')
         var inputElement = this._root.getElementById('input')
 
         inputElement.oninput = (event) => {
           // console.log('event', event.target.value)
-          this._attributeProxy.writeValue(event.target.value).then(() =>
+          var da = new window.tangojs.struct.DeviceAttribute({
+            value: event.target.value
+          })
+          this._attributeProxy.write(da).then(() =>
             console.log('success'))
         }
 
         this._timer = setInterval(() => {
-          this._attributeProxy.readValue().then(result => {
-            valueElement.textContent = result.argout
+          this._attributeProxy.read().then(deviceAttribute => {
+            valueElement.textContent = deviceAttribute.value
           })
         }, this.poll)
       })
-    }
-
-    createdCallback() {
-      this.createInnerDOM()
-      this.setupAttributes()
     }
 
     get model() {

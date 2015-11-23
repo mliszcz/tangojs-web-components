@@ -2,7 +2,7 @@
 
 tangojs-web-components is a collection of controls for
 [tangojs](https://github.com/mliszcz/tangojs). The controls are
-dessigned to work with any framework (or vanilla JS), and
+designed to work with any framework (or vanilla JS), and
 offer standard semantics of HTML*Element.
 
 ## Installation
@@ -33,8 +33,8 @@ All components are derived from
 The behavior and layout depends on information received from underlying
 model (e.g. `AttributeInfo` object).
 
-* [tangojs-label](#Label)
-* [tangojs-value](#Value)
+* [tangojs-label](.#Label)
+* [tangojs-input](.#Input)
 * TODO
 
 ### Label
@@ -59,10 +59,11 @@ model | string          | model | -
 poll  | number          | poll  | Poll period in milliseconds.
 name  | boolean         | name  | Display name (from `AttributeInfo`).
 unit  | boolean         | unit  | Display unit (from `AttributeInfo`).
+value | Object          | N/A | Current value.
 proxy | DeviceAttribute | N/A   | TangoJS proxy.
 
-### Value
+### Input
 
-Displays midifiable attribute value.
+Displays modifiable attribute value.
 
 TODO
