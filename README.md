@@ -7,9 +7,33 @@ offer standard semantics of HTML*Element.
 
 ## Installation
 
-Available in Bower registry:
+It's available in Bower registry, just get it:
 ```
-TODO
+$ bower install tangojs-web-components
+```
+
+and drop desired components into your page:
+```html
+<link rel="import"
+      href="bower_components/tangojs-web-components/src/components/label.html">
+```
+
+### Configuration
+`tangojs-web-components` requires `tangojs` to be configured before any
+components are created. Example:
+```html
+<!-- load scripts -->
+
+<script type="text/javascript">
+  (function () {
+    var model = demoModel.createModel()
+    var conn = new tangojsConnectorLocal.LocalConnector(model)
+    tangojs.setConnector(conn)
+  })()
+</script>
+
+<!-- import components -->
+<!-- use components -->
 ```
 
 ### Requirements
@@ -23,7 +47,7 @@ TODO
 * Chrome 47+
 * Opera 34+
 
-### Loading
+
 TODO
 
 ## Components
@@ -34,36 +58,65 @@ The behavior and layout depends on information received from underlying
 model (e.g. `AttributeInfo` object).
 
 * [tangojs-label](.#Label)
-* [tangojs-input](.#Input)
-* TODO
+* [tangojs-line-edit](.#LineEdit)
+* [tangojs-command-button](.#CommandButton)
+* [tangojs-led](.#Led)
+* [tangojs-plot](.#Plot)
+* [tangojs-trend](.#Trend)
 
 ### Label
+
+*TODO: make LineEdit non-writable*
+
+### LineEdit
 
 Displays value of an attribute. The attribute is polled at
 constant rate.
 
 Example:
 ```html
-<tangojs-label
+<tangojs-line-edit
   model="my/dev/01/attr01"
-  poll="1000"
-  name
-  unit
-  onchange="handleChange"/>
-</tangojs-label>
+  poll-period="1000"
+  show-name
+  show-unit>
+</tangojs-line-edit>
 ```
 
-Property  | Type | Attribute | Remarks
---------- | ---- | --------- | -------
-model | string          | model | -
-poll  | number          | poll  | Poll period in milliseconds.
-name  | boolean         | name  | Display name (from `AttributeInfo`).
-unit  | boolean         | unit  | Display unit (from `AttributeInfo`).
-value | Object          | N/A | Current value.
-proxy | DeviceAttribute | N/A   | TangoJS proxy.
+Property   | Type    | Attribute   | Remarks
+---------- | ------- | ----------- | -------
+model      | string  | model       | Full attribute name.
+pollPeriod | number  | poll-period | Poll period in milliseconds.
+showName   | boolean | show-name   | Should display name (from `AttributeInfo`).
+showUnit   | boolean | show-unit   | Should display unit (from `AttributeInfo`).
 
-### Input
+### CommandButton
 
-Displays modifiable attribute value.
+Executes command on the device.
 
-TODO
+Example:
+```html
+<tangojs-command-button
+  model="my/dev/01/cmd01"
+  parameters="[6]">
+  Click Me!
+</tangojs-command-button>
+
+```
+
+Property   | Type   | Attribute   | Remarks
+---------- | ------ | ----------- | -------
+model      | string | model       | Full command name.
+parameters | object | poll-period | Parameters passed to the command.
+
+### Led
+
+*TODO*
+
+### Plot
+
+*TODO*
+
+### Trend
+
+*same as plot*

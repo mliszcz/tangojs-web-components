@@ -1,0 +1,104 @@
+<!DOCTYPE html>
+
+<script type="text/javascript" src="../web-component-element.js"></script>
+
+<template>
+  <span id="wrapper">
+    <span id="name"></span>
+    <span id="value"></span>
+    <input id="input"/>
+    <span id="unit"></span>
+  </span>
+</template>
+
+<script type="text/javascript">
+(function() {
+  'use strict'
+
+  const template = WebComponentElement
+    .getCurrentDocument(window)
+    .querySelector('template')
+
+  class TangoJsLineEditElement extends WebComponentElement {
+
+    get model() {
+      return this._model
+    }
+
+    set model(value) {
+      this.createAttributeProxy(value)
+      this.updateNameAndUnit()
+      this.restartPollingTimer()
+      this._model = value
+    }
+
+    /** @private */
+    createAttributeProxy (model) {
+      const [_, devname, attrname] = model.match(/^(.+)\/([A-Za-z0-9_]+)$/)
+      this._proxy = new tangojs.proxy.AttributeProxy(devname, attrname)
+    }
+
+    /** @private */
+    updateNameAndUnit () {
+      this._proxy.get_info().then(attributeInfo => {
+        this._root.getElementById('name').textContent
+          = this.showName ? attributeInfo.name : ''
+        this._root.getElementById('unit').textContent
+          = this.showUnit ? attributeInfo.display_unit : ''
+      })
+    }
+
+    /** @private */
+    restartPollingTimer () {
+      const value = this._root.getElementById('value')
+
+      if (this._timer) {
+        clearInterval(this._timer)
+      }
+
+      this._timer = setInterval(() => {
+        this._proxy.read().then(deviceAttribute => {
+          value.textContent = deviceAttribute.value
+        })
+      }, this.pollPeriod)
+    }
+
+    createdCallback () {
+
+      const clone = document.importNode(template.content, true)
+      this._root = this.createShadowRoot()
+      this._root.appendChild(clone)
+
+      const input = this._root.querySelector('input')
+      input.oninput = (event) => this.onInput(event)
+
+      super.createdCallback()
+    }
+
+    onInput (event) {
+      const deviceAttribute = new tangojs.struct.DeviceAttribute({
+        value: event.target.value
+      })
+      this._proxy.write(deviceAttribute).catch(console.error)
+    }
+  }
+
+  WebComponentElement.defineProperties(
+    TangoJsLineEditElement.prototype,
+    ['pollPeriod', 'showName', 'showUnit'])
+
+  WebComponentElement.bindAttributes(
+    TangoJsLineEditElement.prototype,
+    {
+      'model': 'string',
+      'pollPeriod': 'number',
+      'showName': 'boolean',
+      'showUnit': 'boolean'
+    })
+
+  window.document.registerElement('tangojs-line-edit',
+                                  TangoJsLineEditElement)
+
+})()
+
+</script>

@@ -1,0 +1,59 @@
+<!DOCTYPE html>
+
+<html>
+
+  <head>
+    <meta charset="UTF-8">
+
+    <script src="bower_components/firefox-HTMLImports-patch/firefox-HTMLImports-patch.js"></script>
+    <script src="bower_components/webcomponentsjs/HTMLImports.js"></script>
+
+    <script src="node_modules/tangojs/lib/tangojs.js"></script>
+    <script src="node_modules/tangojs-connector-local/lib/tangojs-connector-local.js"></script>
+    <script src="node_modules/tangojs-connector-local/lib/tangojs-demo-model.js"></script>
+
+    <script type="text/javascript">
+      (function () {
+        var model = demoModel.createModel()
+        console.log(model)
+        var conn = new tangojsConnectorLocal.LocalConnector(model)
+        tangojs.setConnector(conn)
+      })()
+    </script>
+
+    <style>
+      form div label {
+        min-width: 250px;
+        display: block;
+        float: left;
+      }
+    </style>
+
+    <link rel="import" href="src/components/tangojs-line-edit.html">
+    <link rel="import" href="src/components/tangojs-command-button.html">
+  </head>
+
+  <body>
+
+    <form>
+      <div>
+        <label>tangojs-line-edit</label>
+        <tangojs-line-edit
+          model="tangojs/test/dev1/scalar"
+          poll-period="1000"
+          show-name
+          show-unit>
+        </tangojs-line-edit>
+      </div>
+      <div>
+        <label>tangojs-command-button</label>
+        <tangojs-command-button
+          model="tangojs/test/dev1/double"
+          parameters="2">
+          Double Command
+        </tangojs-command-button>
+      </div>
+
+  </body>
+
+</html>

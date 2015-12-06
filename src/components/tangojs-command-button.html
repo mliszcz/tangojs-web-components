@@ -1,0 +1,69 @@
+<!DOCTYPE html>
+
+<script type="text/javascript" src="../web-component-element.js"></script>
+
+<template>
+  <button>
+    <content></content>
+  </button>
+</template>
+
+<script type="text/javascript">
+(function() {
+  'use strict'
+
+  const template = WebComponentElement
+    .getCurrentDocument(window)
+    .querySelector('template')
+
+  class TangoJsCommandButtonElement extends WebComponentElement {
+
+    get model() {
+      return this._model
+    }
+
+    set model(value) {
+      const [_, devname, cmdname] = value.match(/^(.+)\/([A-Za-z0-9_]+)$/)
+      this._proxy = new tangojs.proxy.CommandProxy(devname, cmdname)
+      this._model = value
+    }
+
+    createdCallback () {
+
+      const clone = document.importNode(template.content, true)
+      this._root = this.createShadowRoot()
+      this._root.appendChild(clone)
+
+      const button = this._root.querySelector('button')
+      button.onclick = (event) => this.onClick(event)
+
+      super.createdCallback()
+    }
+
+    onClick (event) {
+      const devDataIn = new tangojs.struct.DeviceData(this.parameters)
+      this._proxy.inout(devDataIn)
+        .then(devDataOut => devDataOut.value)
+        .then(value => {
+          console.log(`command (${this.model})@(${this.parameters}) = ${value}`)
+        })
+    }
+  }
+
+  WebComponentElement.defineProperties(
+    TangoJsCommandButtonElement.prototype,
+    ['parameters'])
+
+  WebComponentElement.bindAttributes(
+    TangoJsCommandButtonElement.prototype,
+    {
+      'model': 'string',
+      'parameters': 'object'
+    })
+
+  window.document.registerElement('tangojs-command-button',
+                                  TangoJsCommandButtonElement)
+
+})()
+
+</script>

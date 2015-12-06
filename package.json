@@ -1,8 +1,29 @@
 {
   "name": "tangojs-web-components",
   "version": "0.1.0",
+  "description": "Widgets collection for TangoJS.",
+  "author": "mliszcz",
+  "license": "MIT",
+  "keywords": [
+    "tango"
+  ],
+  "scripts": {
+    "server": "http-server"
+  },
+  "homepage": "https://github.com/mliszcz/tangojs-web-components#readme",
+  "repository": {
+    "type": "git",
+    "url": "git+ssh://git@github.com/mliszcz/tangojs-web-compnents.git"
+  },
+  "bugs": {
+    "url": "https://github.com/mliszcz/tangojs-web-compnents/issues"
+  },
   "dependencies": {
     "tangojs": "^0.2.0",
     "tangojs-connector-local": "^0.2.0"
+  },
+  "devDependencies": {
+    "bower": "^1.6.0",
+    "http-server": "^0.8.0"
   }
 }
