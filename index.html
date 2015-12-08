@@ -15,7 +15,6 @@
     <script type="text/javascript">
       (function () {
         var model = demoModel.createModel()
-        console.log(model)
         var conn = new tangojsConnectorLocal.LocalConnector(model)
         tangojs.setConnector(conn)
       })()
@@ -29,6 +28,7 @@
       }
     </style>
 
+    <link rel="import" href="src/components/tangojs-label.html">
     <link rel="import" href="src/components/tangojs-line-edit.html">
     <link rel="import" href="src/components/tangojs-command-button.html">
     <link rel="import" href="src/components/html-led-element.html">
@@ -38,6 +38,16 @@
   <body>
 
     <form>
+
+      <div>
+        <label>tangojs-label</label>
+        <tangojs-label
+          model="tangojs/test/dev1/sine_trend"
+          poll-period="500"
+          show-name
+          show-unit>
+        </tangojs-label>
+      </div>
 
       <div>
         <label>tangojs-line-edit</label>
@@ -52,9 +62,9 @@
       <div>
         <label>tangojs-command-button</label>
         <tangojs-command-button
-          model="tangojs/test/dev1/double"
+          model="tangojs/test/dev1/double_arg"
           parameters="2">
-          Double Command
+          Double Me!
         </tangojs-command-button>
       </div>
 

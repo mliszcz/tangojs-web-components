@@ -1,8 +1,8 @@
 (function (window) {
   'use strict'
 
-  const _attrMap = Symbol('attributeMapping')
-  const _attrChg = Symbol('selfAttributeChage')
+  const _attrMap = Symbol.for('attributeMapping')
+  const _attrChg = Symbol.for('selfAttributeChage')
 
   /**
    * Base class for all components.
@@ -126,7 +126,7 @@
           Object.defineProperty(prototype, property, descriptor)
 
         } else {
-          console.error(`Property ${property} does not exists `
+          console.error(`Property ${property} does not exists ` +
                         `or in non-configurable`)
         }
       }
@@ -154,12 +154,28 @@
   }
 
   /**
-   * @return {Object} Current document.
+   * @return {Object} window Current document.
    */
   WebComponentElement.getCurrentDocument = function (window) {
     const document = window.document
     const currentScript = (document._currentScript || document.currentScript)
     return currentScript.ownerDocument
+  }
+
+  /**
+   * Registers component and attaches it to global object.
+   * @param {Object} window          Global object.
+   * @param {Object} constructor     Constructor function.
+   * @param {String} htmlElementName Name to register as HTML element.
+   * @param {String} prototypeName   Constructor name to register in global.
+   */
+  WebComponentElement.registerComponent = function (window,
+                                                    constructor,
+                                                    htmlElementName,
+                                                    prototypeName) {
+    window.document.registerElement(htmlElementName, constructor)
+    window.tangojsWebComponents = window.tangojsWebComponents || {}
+    window.tangojsWebComponents[prototypeName] = constructor
   }
 
   window.WebComponentElement = WebComponentElement

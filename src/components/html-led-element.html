@@ -103,8 +103,10 @@
       'on': 'boolean'
     })
 
-  window.document.registerElement('x-led', HTMLLedElement)
-
+  WebComponentElement.registerComponent(window,
+                                        HTMLLedElement,
+                                        'x-led',
+                                        'HTMLLedElement')
 })()
 
 </script>

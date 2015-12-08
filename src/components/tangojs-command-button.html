@@ -63,9 +63,10 @@
       'parameters': 'object'
     })
 
-  window.document.registerElement('tangojs-command-button',
-                                  TangoJsCommandButtonElement)
-
+  WebComponentElement.registerComponent(window,
+                                        TangoJsCommandButtonElement,
+                                        'tangojs-command-button',
+                                        'TangoJsCommandButtonElement')
 })()
 
 </script>

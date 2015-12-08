@@ -62,11 +62,30 @@ model (e.g. `AttributeInfo` object).
 
 ### Label
 
-*TODO: make LineEdit non-writable*
+Displays value of an read-only attribute. The attribute is polled at
+constant rate.
+
+Example:
+```html
+<tangojs-label
+  model="my/dev/01/attr01"
+  poll-period="1000"
+  show-name
+  show-unit>
+</tangojs-label>
+```
+
+Property    | Type    | Attribute    | Remarks
+----------  | ------- | ------------ | -------
+model       | string  | model        | Full attribute name.
+pollPeriod  | number  | poll-period  | Poll period in milliseconds.
+showName    | boolean | show-name    | Should display name.
+showUnit    | boolean | show-unit    | Should display unit.
+showQuality | boolean | show-quality | Should display quality led.
 
 ### LineEdit
 
-Displays value of an attribute. The attribute is polled at
+Displays value of an writable attribute. The attribute is polled at
 constant rate.
 
 Example:
@@ -79,12 +98,13 @@ Example:
 </tangojs-line-edit>
 ```
 
-Property   | Type    | Attribute   | Remarks
----------- | ------- | ----------- | -------
-model      | string  | model       | Full attribute name.
-pollPeriod | number  | poll-period | Poll period in milliseconds.
-showName   | boolean | show-name   | Should display name (from `AttributeInfo`).
-showUnit   | boolean | show-unit   | Should display unit (from `AttributeInfo`).
+Property    | Type    | Attribute    | Remarks
+----------  | ------- | ------------ | -------
+model       | string  | model        | Full attribute name.
+pollPeriod  | number  | poll-period  | Poll period in milliseconds.
+showName    | boolean | show-name    | Should display name.
+showUnit    | boolean | show-unit    | Should display unit.
+showQuality | boolean | show-quality | Should display quality led.
 
 ### CommandButton
 
