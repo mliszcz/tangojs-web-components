@@ -1,0 +1,110 @@
+<!DOCTYPE html>
+
+<script type="text/javascript" src="../web-component-element.js"></script>
+
+<template>
+
+  <style>
+    span.led-container {
+      background-size: cover;
+      background: linear-gradient(to bottom,
+                                  rgba(226,226,226,1) 0%,
+                                  rgba(219,219,219,1) 50%,
+                                  rgba(209,209,209,1) 51%,
+                                  rgba(254,254,254,1) 100%);
+      border-radius: 50%;
+      width: inherit;
+      height: inherit;
+    }
+    span.led {
+      margin: 0 auto;
+      width: 24px;
+      height: 24px;
+      display: inline-block;
+      border-radius: 50%;
+    }
+  </style>
+
+  <span class="led-container">
+    <span class="led"></span>
+  </span>
+
+</template>
+
+<script type="text/javascript">
+(function() {
+  'use strict'
+
+  const template = WebComponentElement
+    .getCurrentDocument(window)
+    .querySelector('template')
+
+  const hexColorRegex = /^#([0-9A-Fa-f]{2})([0-9A-Fa-f]{2})([0-9A-Fa-f]{2})$/
+
+  class HTMLLedElement extends WebComponentElement {
+
+    get color () {
+      return this._color
+    }
+
+    set color (value) {
+      this.updateColorStyle(value)
+      this._color = value
+    }
+
+    get on () {
+      return this._on
+    }
+
+    set on (value) {
+      this._on = value
+      if (this.color) {
+        this.updateColorStyle(this.color)
+      }
+    }
+
+    updateColorStyle (hexColor) {
+
+      const [_, hexR, hexG, hexB] = hexColor.match(hexColorRegex)
+
+      const [decR, decG, decB] = [hexR, hexG, hexB]
+        .map(h => parseInt(h, 16))
+      const [insR, insG, insB] = [decR, decG, decB]
+        .map(d => parseInt(d / 8.0 + 13.0))
+      const [colR, colG, colB] = [decR, decG, decB]
+        .map(d => this.on ? d : parseInt(d*0.5))
+
+      const shadow = this.on
+        ? `0 -1px 7px 1px rgba(${decR}, ${decG}, ${decB}, 0.2),
+          inset 0 -1px 9px rgb(${insR}, ${insG}, ${insB}),
+          0 2px 12px rgba(${decR}, ${decG}, ${decB}, 0.5)`
+        : `inset 0 -1px 9px rgb(${insR}, ${insG}, ${insB})`
+
+      Object.assign(this._root.querySelector('.led').style, {
+        backgroundColor: `rgb(${colR}, ${colG}, ${colB})`,
+        boxShadow: shadow
+      })
+    }
+
+    createdCallback () {
+
+      const clone = document.importNode(template.content, true)
+      this._root = this.createShadowRoot()
+      this._root.appendChild(clone)
+
+      super.createdCallback()
+    }
+  }
+
+  WebComponentElement.bindAttributes(
+    HTMLLedElement.prototype,
+    {
+      'color': 'string',
+      'on': 'boolean'
+    })
+
+  window.document.registerElement('x-led', HTMLLedElement)
+
+})()
+
+</script>

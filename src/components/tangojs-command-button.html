@@ -45,14 +45,16 @@
       this._proxy.inout(devDataIn)
         .then(devDataOut => devDataOut.value)
         .then(value => {
-          console.log(`command (${this.model})@(${this.parameters}) = ${value}`)
+            if (this.onresult && this.onresult.call) {
+            this.onresult.call(this, value)
+          }
         })
     }
   }
 
   WebComponentElement.defineProperties(
     TangoJsCommandButtonElement.prototype,
-    ['parameters'])
+    ['parameters', 'onresult'])
 
   WebComponentElement.bindAttributes(
     TangoJsCommandButtonElement.prototype,

@@ -31,11 +31,14 @@
 
     <link rel="import" href="src/components/tangojs-line-edit.html">
     <link rel="import" href="src/components/tangojs-command-button.html">
+    <link rel="import" href="src/components/html-led-element.html">
+
   </head>
 
   <body>
 
     <form>
+
       <div>
         <label>tangojs-line-edit</label>
         <tangojs-line-edit
@@ -45,6 +48,7 @@
           show-unit>
         </tangojs-line-edit>
       </div>
+
       <div>
         <label>tangojs-command-button</label>
         <tangojs-command-button
@@ -53,6 +57,21 @@
           Double Command
         </tangojs-command-button>
       </div>
+
+      <div>
+        <label>x-led</label>
+        <!-- <div>some dumb text</div> -->
+        <x-led color="#FFFF00" on></x-led>
+      </div>
+
+    </form>
+
+    <script type="text/javascript">
+      document.querySelector('tangojs-command-button').onresult =
+        function commandButtonHandleResult (value) {
+          alert(`command: (${this.model})@(${this.parameters}) = ${value}`)
+        }
+    </script>
 
   </body>
 

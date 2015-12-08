@@ -116,10 +116,10 @@
           const setter = descriptor.set
           descriptor.set = function (value) {
             setter.call(this, value)
+            this[_attrChg][attribute] = true
             if (mapping.type === 'boolean' && !value) {
               this.removeAttribute(attribute)
             } else {
-              this[_attrChg][attribute] = true
               this.setAttribute(attribute, mapping.mapFromFn(value))
             }
           }

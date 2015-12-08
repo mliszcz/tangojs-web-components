@@ -104,10 +104,11 @@ Example:
 
 ```
 
-Property   | Type   | Attribute   | Remarks
----------- | ------ | ----------- | -------
-model      | string | model       | Full command name.
-parameters | object | poll-period | Parameters passed to the command.
+Property   | Type     | Attribute   | Remarks
+---------- | -------- | ----------- | -------
+model      | string   | model       | Full command name.
+parameters | object   | poll-period | Parameters passed to the command.
+onresult   | function | N/A         | Callback invoked on successful call.
 
 ### Led
 
