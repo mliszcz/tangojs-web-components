@@ -45,10 +45,6 @@ components are created. Example:
   * applying [this patch](https://gist.github.com/d11ea630cc777012d69b.git)
     just before the polyfill is loaded
 * Chrome 47+
-* Opera 34+
-
-
-TODO
 
 ## Components
 
@@ -57,12 +53,12 @@ All components are derived from
 The behavior and layout depends on information received from underlying
 model (e.g. `AttributeInfo` object).
 
-* [tangojs-label](.#Label)
-* [tangojs-line-edit](.#LineEdit)
-* [tangojs-command-button](.#CommandButton)
-* [tangojs-led](.#Led)
-* [tangojs-plot](.#Plot)
-* [tangojs-trend](.#Trend)
+* [tangojs-label](#label)
+* [tangojs-line-edit](#lineedit)
+* [tangojs-command-button](.#commandbutton)
+* [tangojs-led](.#led)
+* [tangojs-plot](.#plot)
+* [tangojs-trend](.#trend)
 
 ### Label
 
@@ -107,7 +103,7 @@ Example:
 Property   | Type     | Attribute   | Remarks
 ---------- | -------- | ----------- | -------
 model      | string   | model       | Full command name.
-parameters | object   | poll-period | Parameters passed to the command.
+parameters | object   | parameters  | Parameters passed to the command.
 onresult   | function | N/A         | Callback invoked on successful call.
 
 ### Led
