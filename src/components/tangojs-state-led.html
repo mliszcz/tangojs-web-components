@@ -1,0 +1,129 @@
+<!DOCTYPE html>
+
+<script type="text/javascript" src="../web-component-element.js"></script>
+<link rel="import" href="html-led-element.html">
+
+<template>
+  <span id="wrapper">
+    <span id="name"></span>
+    <span id="value"></span>
+  </span>
+</template>
+
+<script type="text/javascript">
+(function() {
+  'use strict'
+
+  const template = WebComponentElement
+    .getCurrentDocument(window)
+    .querySelector('template')
+
+  class TangoJsStateLed extends WebComponentElement {
+
+    get model() {
+      return this._model
+    }
+
+    set model(value) {
+      this.createDeviceProxy(value)
+      this.restartPollingTimer()
+      this._model = value
+    }
+
+    get showLed () {
+      return this._showLed
+    }
+
+    set showLed (value) {
+      this.toggleLed(value)
+      this._showLed = value
+    }
+
+    get model() {
+      return this._model
+    }
+
+    /** @private */
+    createDeviceProxy (model) {
+      this._proxy = new tangojs.proxy.DeviceProxy(model)
+      this._proxy.get_info().then(deviceInfo => {
+        this._root.getElementById('name').textContent
+          = this.showName ? deviceInfo.name : ''
+      })
+    }
+
+    /** @private */
+    restartPollingTimer () {
+      const value = this._root.getElementById('value')
+
+      if (this._timer) {
+        clearInterval(this._timer)
+      }
+
+      this._timer = setInterval(() => {
+        this._proxy.state()
+          .then(devState => {
+            const [color, on] = this.getLedSetup(devState)
+            this._led.color = color
+            this._led.on = on
+            value.textContent = devState.key
+          })
+          .catch(e => console.error(e))
+      }, this.pollPeriod)
+    }
+
+    /** @private */
+    getLedSetup (devState) {
+      switch (devState) {
+        case tangojs.tango.DevState.ON: return ['#80FF00', true]
+        case tangojs.tango.DevState.OFF: return ['#80FF00', false]
+        case tangojs.tango.DevState.RUNNING: return ['#0080FF', true]
+        case tangojs.tango.DevState.FAULT: return ['#FF0000', true]
+        case tangojs.tango.DevState.ALARM: return ['#FF8000', true]
+        default: return ['#FF00FF', true]
+      }
+    }
+
+    /** @private */
+    toggleLed (newShowLed) {
+      if (newShowLed && !this.showLed) {
+        this._root.getElementById('wrapper').appendChild(this._led)
+      } else if (!newShowLed && this.showLed) {
+        this._root.getElementById('wrapper').removeChild(this._led)
+      }
+    }
+
+    createdCallback () {
+
+      const clone = document.importNode(template.content, true)
+      this._root = this.createShadowRoot()
+      this._root.appendChild(clone)
+
+      this._led = document.createElement('x-led')
+      this._led.setAttribute('color', '#FF0000')
+      this._led.setAttribute('on', '')
+
+      super.createdCallback()
+    }
+  }
+
+  WebComponentElement.defineProperties(
+    TangoJsStateLed.prototype,
+    ['pollPeriod', 'showName'])
+
+  WebComponentElement.bindAttributes(
+    TangoJsStateLed.prototype,
+    {
+      'model': 'string',
+      'pollPeriod': 'number',
+      'showName': 'boolean',
+      'showLed': 'boolean'
+    })
+
+  WebComponentElement.registerComponent(window,
+                                        TangoJsStateLed,
+                                        'tangojs-state-led',
+                                        'TangoJsStateLed')
+})()
+
+</script>

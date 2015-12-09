@@ -34,7 +34,7 @@
       const deviceAttribute = new tangojs.struct.DeviceAttribute({
         value: event.target.value
       })
-      this._proxy.write(deviceAttribute).catch(e => console.error(x))
+      this._proxy.write(deviceAttribute).catch(e => console.error(e))
     }
   }
 

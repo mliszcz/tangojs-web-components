@@ -1,6 +1,7 @@
 <!DOCTYPE html>
 
 <script type="text/javascript" src="../web-component-element.js"></script>
+<link rel="import" href="html-led-element.html">
 
 <template>
   <span id="wrapper">
@@ -70,7 +71,12 @@
             this._led.color = this.getQualityLedColor(deviceAttribute.quality)
             value.textContent = deviceAttribute.value
           })
-          .catch(e => console.error(e))
+          .catch(error => {
+            console.error(error)
+            this._led.color = this.getQualityLedColor(
+              tangojs.tango.AttrQuality.ATTR_INVALID)
+            value.textContent = '-error-'
+          })
       }, this.pollPeriod)
     }
 
@@ -78,7 +84,7 @@
     getQualityLedColor (quality) {
       switch (quality) {
         case tangojs.tango.AttrQuality.ATTR_VALID: return '#80FF00'
-        case tangojs.tango.AttrQuality.ATTR_INVALID: return '#FF00FF'
+        case tangojs.tango.AttrQuality.ATTR_INVALID: return '#880088'
         case tangojs.tango.AttrQuality.ATTR_ALARM: return '#FF0000'
         case tangojs.tango.AttrQuality.ATTR_CHANGING: return '#0080FF'
         case tangojs.tango.AttrQuality.ATTR_WARNING: return '#FFFF00'

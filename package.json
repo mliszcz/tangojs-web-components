@@ -19,7 +19,7 @@
     "url": "https://github.com/mliszcz/tangojs-web-compnents/issues"
   },
   "dependencies": {
-    "tangojs": "^0.2.0",
+    "tangojs": "../tangojs",
     "tangojs-connector-local": "../tangojs-connector-local"
   },
   "devDependencies": {

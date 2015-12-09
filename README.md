@@ -44,7 +44,7 @@ components are created. Example:
     [HTMLImports polyfill](http://webcomponents.org/polyfills/html-imports/)
   * applying [this patch](https://gist.github.com/d11ea630cc777012d69b.git)
     just before the polyfill is loaded
-* Chrome 47+
+* ~~Chrome 47+~~ (*currently not supported*)
 
 ## Components
 
@@ -76,7 +76,7 @@ Example:
 ```
 
 Property    | Type    | Attribute    | Remarks
-----------  | ------- | ------------ | -------
+----------- | ------- | ------------ | -------
 model       | string  | model        | Full attribute name.
 pollPeriod  | number  | poll-period  | Poll period in milliseconds.
 showName    | boolean | show-name    | Should display name.
@@ -87,6 +87,9 @@ showQuality | boolean | show-quality | Should display quality led.
 
 Displays value of an writable attribute. The attribute is polled at
 constant rate.
+
+*TODO: handle attribute types, e.g. input[type=number] for numbers,
+toggle / radio-btn for booleans*
 
 Example:
 ```html
@@ -99,7 +102,7 @@ Example:
 ```
 
 Property    | Type    | Attribute    | Remarks
-----------  | ------- | ------------ | -------
+----------- | ------- | ------------ | -------
 model       | string  | model        | Full attribute name.
 pollPeriod  | number  | poll-period  | Poll period in milliseconds.
 showName    | boolean | show-name    | Should display name.
@@ -108,16 +111,15 @@ showQuality | boolean | show-quality | Should display quality led.
 
 ### CommandButton
 
-Executes command on the device.
+Executes command on the device. Takes arbitrary HTML nodes as children.
 
 Example:
 ```html
 <tangojs-command-button
   model="my/dev/01/cmd01"
-  parameters="[6]">
+  parameters="6">
   Click Me!
 </tangojs-command-button>
-
 ```
 
 Property   | Type     | Attribute   | Remarks
@@ -128,7 +130,24 @@ onresult   | function | N/A         | Callback invoked on successful call.
 
 ### Led
 
-*TODO*
+Displays device state.
+
+Example:
+```html
+<tangojs-state-led
+  model="my/dev/01"
+  poll-period="1000"
+  show-name
+  show-led>
+</tangojs-state-led>
+```
+
+Property   | Type    | Attribute   | Remarks
+---------- | ------- | ----------- | -------
+model      | string  | model       | Full device name.
+pollPeriod | number  | poll-period | Poll period in milliseconds.
+showName   | boolean | show-name   | Should display name.
+showLed    | boolean | show-led    | Should display led.
 
 ### Plot
 

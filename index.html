@@ -28,10 +28,11 @@
       }
     </style>
 
+    <link rel="import" href="src/components/html-led-element.html">
     <link rel="import" href="src/components/tangojs-label.html">
     <link rel="import" href="src/components/tangojs-line-edit.html">
     <link rel="import" href="src/components/tangojs-command-button.html">
-    <link rel="import" href="src/components/html-led-element.html">
+    <link rel="import" href="src/components/tangojs-state-led.html">
 
   </head>
 
@@ -74,6 +75,32 @@
         <label>x-led</label>
         <!-- <div>some dumb text</div> -->
         <x-led color="#FFFF00" on></x-led>
+      </div>
+
+      <div>
+        <label>tangojs-state-led</label>
+        <tangojs-state-led
+          model="tangojs/test/dev1"
+          poll-period="1000"
+          show-name
+          show-led>
+        </tangojs-state-led>
+      </div>
+
+      <div>
+        <label>tangojs-command-button</label>
+        <tangojs-command-button model="tangojs/test/dev1/goto_on">
+          state: ON
+        </tangojs-command-button>
+        <tangojs-command-button model="tangojs/test/dev1/goto_off">
+          state: OFF
+        </tangojs-command-button>
+        <tangojs-command-button model="tangojs/test/dev1/goto_fault">
+          state: FAULT
+        </tangojs-command-button>
+        <tangojs-command-button model="tangojs/test/dev1/goto_alarm">
+          state: ALARM
+        </tangojs-command-button>
       </div>
 
     </form>
