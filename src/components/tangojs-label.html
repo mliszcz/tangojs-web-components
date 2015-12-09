@@ -7,7 +7,6 @@
     <span id="name"></span>
     <span id="value"></span>
     <span id="unit"></span>
-    <!-- TODO add led with quality -->
   </span>
 </template>
 
@@ -30,6 +29,15 @@
       this.updateNameAndUnit()
       this.restartPollingTimer()
       this._model = value
+    }
+
+    get showQuality () {
+      return this._showQuality
+    }
+
+    set showQuality (value) {
+      this.toggleQualityLed(value)
+      this._showQuality = value
     }
 
     /** @private */
@@ -59,10 +67,31 @@
       this._timer = setInterval(() => {
         this._proxy.read()
           .then(deviceAttribute => {
+            this._led.color = this.getQualityLedColor(deviceAttribute.quality)
             value.textContent = deviceAttribute.value
           })
           .catch(e => console.error(e))
       }, this.pollPeriod)
+    }
+
+    /** @private */
+    getQualityLedColor (quality) {
+      switch (quality) {
+        case tangojs.tango.AttrQuality.ATTR_VALID: return '#80FF00'
+        case tangojs.tango.AttrQuality.ATTR_INVALID: return '#FF00FF'
+        case tangojs.tango.AttrQuality.ATTR_ALARM: return '#FF0000'
+        case tangojs.tango.AttrQuality.ATTR_CHANGING: return '#0080FF'
+        case tangojs.tango.AttrQuality.ATTR_WARNING: return '#FFFF00'
+      }
+    }
+
+    /** @private */
+    toggleQualityLed (newShowQuality) {
+      if (newShowQuality && !this.showQuality) {
+        this._root.getElementById('wrapper').appendChild(this._led)
+      } else if (!newShowQuality && this.showQuality) {
+        this._root.getElementById('wrapper').removeChild(this._led)
+      }
     }
 
     createdCallback () {
@@ -70,6 +99,10 @@
       const clone = document.importNode(template.content, true)
       this._root = this.createShadowRoot()
       this._root.appendChild(clone)
+
+      this._led = document.createElement('x-led')
+      this._led.setAttribute('color', '#FF0000')
+      this._led.setAttribute('on', '')
 
       super.createdCallback()
     }
@@ -85,7 +118,8 @@
       'model': 'string',
       'pollPeriod': 'number',
       'showName': 'boolean',
-      'showUnit': 'boolean'
+      'showUnit': 'boolean',
+      'showQuality': 'boolean'
     })
 
   WebComponentElement.registerComponent(window,

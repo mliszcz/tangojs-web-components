@@ -15,14 +15,6 @@
 
   class TangoJsLineEditElement extends TangoJsLabelElement {
 
-    get model () {
-      return super.model
-    }
-
-    set model (value) {
-      super.model = value
-    }
-
     createdCallback () {
 
       super.createdCallback()
@@ -56,7 +48,8 @@
       'model': 'string',
       'pollPeriod': 'number',
       'showName': 'boolean',
-      'showUnit': 'boolean'
+      'showUnit': 'boolean',
+      'showQuality': 'boolean'
     })
 
   WebComponentElement.registerComponent(window,

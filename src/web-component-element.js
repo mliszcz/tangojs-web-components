@@ -83,6 +83,14 @@
     const hypenated = (s) => s.replace(/([a-z])([A-Z])/g, '$1-$2').toLowerCase()
     const camelCase = (s) => s.replace(/-([a-z])/g, (g) => g[1].toUpperCase())
 
+    const getPropertyDescriptor = (object, property) => {
+      if (object) {
+        const descriptor = Object.getOwnPropertyDescriptor(object, property)
+        return descriptor || getPropertyDescriptor(
+          Object.getPrototypeOf(object), property)
+      }
+    }
+
     // attach mapping for reuse in WebComponentElement prototype methods
     prototype[_attrMap] = attributeMapping
 
@@ -108,7 +116,7 @@
       mapping.mapToFn = mapping.mapToFn || converters.to
       mapping.mapFromFn = mapping.mapFromFn || converters.from
 
-      const descriptor = Object.getOwnPropertyDescriptor(prototype, property)
+      const descriptor = getPropertyDescriptor(prototype, property)
 
       if (mapping.mapFrom) {
         if (descriptor && descriptor.configurable) {
