@@ -12,7 +12,7 @@ It's available in Bower registry, just get it:
 $ bower install tangojs-web-components
 ```
 
-and drop desired components into your page:
+and drop desired components onto your page:
 ```html
 <link rel="import"
       href="bower_components/tangojs-web-components/src/components/label.html">
@@ -55,10 +55,11 @@ model (e.g. `AttributeInfo` object).
 
 * [tangojs-label](#label)
 * [tangojs-line-edit](#lineedit)
-* [tangojs-command-button](.#commandbutton)
-* [tangojs-led](.#led)
-* [tangojs-plot](.#plot)
-* [tangojs-trend](.#trend)
+* [tangojs-command-button](#commandbutton)
+* [tangojs-state-led](#led)
+* [tangojs-plot](#plot)
+* [tangojs-trend](#trend)
+* [tangojs-form](#form)
 
 ### Label
 
@@ -155,4 +156,31 @@ showLed    | boolean | show-led    | Should display led.
 
 ### Trend
 
-*same as plot*
+Plots multiple attributes over time.
+Example:
+```html
+<tangojs-trend
+  model='["tangojs/test/dev1/sine_trend", "tangojs/test/dev1/scalar"]'
+  poll-period="1000"
+  data-limit="5">
+</tangojs-trend>
+```
+
+Property   | Type     | Attribute   | Remarks
+---------- | -------- | ----------- | -------
+model      | string[] | model       | Array of attribute names.
+pollPeriod | number   | poll-period | Poll period in milliseconds.
+dataLimit  | number   | data-limit  | Max no. of entries per dataset.
+
+**Note:** `tangojs-trend` widget is built
+on top of [Chart.js](http://www.chartjs.org/). You have to include
+dependencies manually:
+
+```
+<script src="bower_components/moment/min/moment.min.js"></script>
+<script src="bower_components/Chart.js/Chart.js"></script>
+```
+
+### Form
+
+*TODO*

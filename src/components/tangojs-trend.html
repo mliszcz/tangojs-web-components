@@ -1,0 +1,165 @@
+<!DOCTYPE html>
+
+<script type="text/javascript" src="../web-component-element.js"></script>
+
+<template>
+  <div id="plot-container" style="width: 680px; height: 600px; display: inline-block;">
+    <canvas id="plot-canvas" style="width:100%;height:100%"></canvas>
+  </div>
+</template>
+
+<script type="text/javascript">
+(function() {
+  'use strict'
+
+  class SeededPrng {
+    constructor (seed) {
+      this._seed = seed
+    }
+    nextDouble () {
+      const x = Math.sin(this._seed++) * 10000
+      return x - Math.floor(x)
+    }
+  }
+
+  const prng = new SeededPrng(10)
+  const randcf = () => Math.round(prng.nextDouble() * 255)
+  const randomColor = () => `rgb(${randcf()},${randcf()},${randcf()})`
+
+  const template = WebComponentElement
+    .getCurrentDocument(window)
+    .querySelector('template')
+
+  const plotOptions = {
+    responsive: true,
+    animation: {
+      duration: 0 // the plot is unreadable with animation
+      // easing: 'easeOutBack'
+    },
+    scales: {
+      xAxes: [{
+        type: 'time',
+        display: true,
+        time: {
+          // format: (date) => moment(new Date(date))
+          unit: 'second'
+        },
+        scaleLabel: {
+          display: true,
+          labelString: 'time'
+        },
+        gridLines: {
+          display: false
+        }
+      }],
+      yAxes: [{
+        display: true,
+        scaleLabel: {
+          display: true,
+          labelString: 'value'
+        }
+      }]
+    }
+  }
+
+  class TangoJsTrendElement extends WebComponentElement {
+
+    get model() {
+      return this._model
+    }
+
+    set model(value) {
+      this.createAttributeProxies(value)
+      this.restartPollingTimer()
+      this._model = value
+    }
+
+    /** @private */
+    createAttributeProxies (models) {
+
+      this._proxy = models.map(model => {
+        const [_, devname, attrname] = model.match(/^(.+)\/([A-Za-z0-9_]+)$/)
+        return new tangojs.proxy.AttributeProxy(devname, attrname)
+      })
+
+      this._plotData.datasets = models.map(model => {
+        return {
+          label: model,
+          data: [],
+          fill: false,
+          borderColor: randomColor()
+        }
+      })
+    }
+
+    /** @private */
+    restartPollingTimer () {
+
+      if (this._timer) {
+        clearInterval(this._timer)
+      }
+
+      this._timer = setInterval(() => {
+
+        const readDate = (new Date()).getTime()
+
+        Promise.all(this._proxy.map(proxy => proxy.read()))
+          .then(deviceAttributes => {
+            this._plotData.labels = [readDate]
+            deviceAttributes.forEach((devAttr, i) => {
+              this._plotData.datasets[i].data.push({
+                x: readDate,
+                y: devAttr.value
+              })
+              while (this._plotData.datasets[i].data.length > this.dataLimit) {
+                this._plotData.datasets[i].data.shift()
+              }
+          })
+          this._plot.update()
+        })
+        .catch(e => console.error(e))
+      }, this.pollPeriod)
+    }
+
+    createdCallback () {
+
+      const clone = document.importNode(template.content, true)
+      this._root = this.createShadowRoot()
+      this._root.appendChild(clone)
+
+      const ctx = this._root.getElementById('plot-canvas').getContext('2d')
+
+      this._plotData = {
+        labels: [new Date()],
+        datasets: []
+      }
+
+      this._plot = new Chart(ctx, {
+        type: 'line',
+        data: this._plotData,
+        options: plotOptions
+      })
+
+      super.createdCallback()
+    }
+  }
+
+  WebComponentElement.defineProperties(
+    TangoJsTrendElement.prototype,
+    ['pollPeriod', 'dataLimit'])
+
+  WebComponentElement.bindAttributes(
+    TangoJsTrendElement.prototype,
+    {
+      'model': 'array',
+      'pollPeriod': 'number',
+      'dataLimit': 'number'
+    })
+
+  WebComponentElement.registerComponent(window,
+                                        TangoJsTrendElement,
+                                        'tangojs-trend',
+                                        'TangoJsTrendElement')
+})()
+
+</script>

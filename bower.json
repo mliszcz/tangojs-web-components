@@ -21,6 +21,8 @@
   ],
   "dependencies": {
     "webcomponentsjs": "^0.7.19",
-    "firefox-HTMLImports-patch": "https://gist.github.com/d11ea630cc777012d69b.git"
+    "firefox-HTMLImports-patch": "https://gist.github.com/d11ea630cc777012d69b.git",
+    "Chart.js": "2.0.0-beta1",
+    "moment": "^2.10.6"
   }
 }

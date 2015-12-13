@@ -8,6 +8,9 @@
     <script src="bower_components/firefox-HTMLImports-patch/firefox-HTMLImports-patch.js"></script>
     <script src="bower_components/webcomponentsjs/HTMLImports.js"></script>
 
+    <script src="bower_components/moment/min/moment.min.js"></script>
+    <script src="bower_components/Chart.js/Chart.js"></script>
+
     <script src="node_modules/tangojs/lib/tangojs.js"></script>
     <script src="node_modules/tangojs-connector-local/lib/tangojs-connector-local.js"></script>
     <script src="node_modules/tangojs-connector-local/lib/tangojs-demo-model.js"></script>
@@ -33,6 +36,7 @@
     <link rel="import" href="src/components/tangojs-line-edit.html">
     <link rel="import" href="src/components/tangojs-command-button.html">
     <link rel="import" href="src/components/tangojs-state-led.html">
+    <link rel="import" href="src/components/tangojs-trend.html">
 
   </head>
 
@@ -73,7 +77,6 @@
 
       <div>
         <label>x-led</label>
-        <!-- <div>some dumb text</div> -->
         <x-led color="#FFFF00" on></x-led>
       </div>
 
@@ -101,6 +104,15 @@
         <tangojs-command-button model="tangojs/test/dev1/goto_alarm">
           state: ALARM
         </tangojs-command-button>
+      </div>
+
+      <div>
+        <label>tangojs-trend</label>
+        <tangojs-trend
+          model='["tangojs/test/dev1/sine_trend", "tangojs/test/dev1/scalar"]'
+          poll-period="1000"
+          data-limit="15">
+        </tangojs-trend>
       </div>
 
     </form>

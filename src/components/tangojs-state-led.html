@@ -18,7 +18,7 @@
     .getCurrentDocument(window)
     .querySelector('template')
 
-  class TangoJsStateLed extends WebComponentElement {
+  class TangoJsStateLedElement extends WebComponentElement {
 
     get model() {
       return this._model
@@ -37,10 +37,6 @@
     set showLed (value) {
       this.toggleLed(value)
       this._showLed = value
-    }
-
-    get model() {
-      return this._model
     }
 
     /** @private */
@@ -108,11 +104,11 @@
   }
 
   WebComponentElement.defineProperties(
-    TangoJsStateLed.prototype,
+    TangoJsStateLedElement.prototype,
     ['pollPeriod', 'showName'])
 
   WebComponentElement.bindAttributes(
-    TangoJsStateLed.prototype,
+    TangoJsStateLedElement.prototype,
     {
       'model': 'string',
       'pollPeriod': 'number',
@@ -121,9 +117,9 @@
     })
 
   WebComponentElement.registerComponent(window,
-                                        TangoJsStateLed,
+                                        TangoJsStateLedElement,
                                         'tangojs-state-led',
-                                        'TangoJsStateLed')
+                                        'TangoJsStateLedElement')
 })()
 
 </script>
