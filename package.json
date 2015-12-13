@@ -19,8 +19,8 @@
     "url": "https://github.com/mliszcz/tangojs-web-compnents/issues"
   },
   "dependencies": {
-    "tangojs": "https://github.com/mliszcz/tangojs.git",
-    "tangojs-connector-local": "http://github.com/mliszcz/tangojs-connector-local.git"
+    "tangojs": "../tangojs",
+    "tangojs-connector-local": "../tangojs-connector-local"
   },
   "devDependencies": {
     "bower": "^1.6.0",
