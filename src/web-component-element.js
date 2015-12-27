@@ -295,6 +295,17 @@
     }
   }
 
+  /** Apply WebComponentElement.wireAttribute to multiple attributes at once.
+   * @param {Object} prototype target prototype
+   * @param {Object} mappings  mapping dictionary
+   */
+  WebComponentElement.wireAttributes = function (prototype, mappings) {
+    Object.keys(mappings).forEach(property => {
+      WebComponentElement.wireAttribute(Object.assign({prototype, property},
+                                                      mappings[property]))
+    })
+  }
+
   /** Returns owner document for current script.
    * @param {Object} window object
    * @return {Object} current document

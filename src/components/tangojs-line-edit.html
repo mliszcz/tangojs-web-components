@@ -1,6 +1,7 @@
 <!DOCTYPE html>
 
 <script type="text/javascript" src="../web-component-element.js"></script>
+<script type="text/javascript" src="../tangojs-element.js"></script>
 <link rel="import" href="tangojs-label.html">
 
 <script type="text/javascript">
@@ -8,26 +9,19 @@
   'use strict'
 
   const WebComponentElement = window.WebComponentElement
-  const document = window.document
   const tangojs = window.tangojs
-
-  const template = WebComponentElement
-    .getCurrentDocument(window)
-    .querySelector('template')
 
   const TangoJsLabelElement = window.tangojsWebComponents.TangoJsLabelElement
 
   class TangoJsLineEditElement extends TangoJsLabelElement {
 
-    createdCallback () {
-
-      super.createdCallback()
-
-      const input = window.document.createElement('input')
-      input.setAttribute('id', 'input')
-      input.oninput = (event) => this.onInput(event)
-
-      this.dom.wrapper.insertBefore(input, this.dom.value.nextSibling)
+    createLocalDom () {
+      const dom = super.createLocalDom()
+      const input = this.createFlexFormField('input', 3, 1)
+      input.element.oninput = (event) => this.onInput(event)
+      dom.grid.appendChild(input.flex)
+      dom.input = input.element
+      return dom
     }
 
     onInput (event) {
@@ -40,12 +34,8 @@
     }
   }
 
-  window.tangojsWebComponents = window.tangojsWebComponents || {}
+  TangoJsElement.registerComponent(TangoJsLineEditElement, 'tangojs-line-edit')
 
-  WebComponentElement.registerComponent(window,
-                                        window.tangojsWebComponents,
-                                        TangoJsLineEditElement,
-                                        'tangojs-line-edit')
 })(window)
 
 </script>

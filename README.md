@@ -38,13 +38,15 @@ components are created. Example:
 
 ### Requirements
 * Mozilla Firefox 44+  
-  Version 44 requires:
-  * enabling `dom.webcomponents.enabled`
-  * using
+  * enable [`dom.webcomponents.enabled`](about:config)
+  * enable [`layout.css.grid.enabled`](about:config) (tested on 46.0a1)
+  * use
     [HTMLImports polyfill](http://webcomponents.org/polyfills/html-imports/)
-  * applying [this patch](https://gist.github.com/d11ea630cc777012d69b.git)
+  * apply [this patch](https://gist.github.com/d11ea630cc777012d69b.git)
     just before the polyfill is loaded
 * Google Chrome 49+
+  * enable [chrome://flags/#enable-experimental-web-platform-features](
+    chrome://flags/#enable-experimental-web-platform-features)
 
 ## Components
 

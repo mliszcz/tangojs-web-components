@@ -1,79 +1,60 @@
 <!DOCTYPE html>
 
 <script type="text/javascript" src="../web-component-element.js"></script>
+<script type="text/javascript" src="../tangojs-element.js"></script>
 <link rel="import" href="html-led-element.html">
 
-<template>
-  <span id="wrapper">
-    <span id="name"></span>
-    <span id="value"></span>
-  </span>
-</template>
-
 <script type="text/javascript">
-(function() {
+(function (window) {
   'use strict'
 
   const WebComponentElement = window.WebComponentElement
-  const document = window.document
   const tangojs = window.tangojs
-
-  const template = WebComponentElement
-    .getCurrentDocument(window)
-    .querySelector('template')
 
   class TangoJsStateLedElement extends window.HTMLElement {
 
     createdCallback () {
-
-      const clone = document.importNode(template.content, true)
       this.root = this.createShadowRoot()
-      this.root.appendChild(clone)
+      this.dom = this.createLocalDom()
+      this.root.appendChild(this.dom.grid)
+    }
 
-      this.led = document.createElement('x-led')
-      this.led.setAttribute('color', '#FF0000')
-      this.led.setAttribute('on', '')
-
-      this.dom = {
-        wrapper: this.root.getElementById('wrapper'),
-        name: this.root.getElementById('name'),
-        value: this.root.getElementById('value')
+    createLocalDom () {
+      const grid = this.createFormGrid()
+      const dom = {
+        name: this.createFormField('span', 1, 1),
+        value: this.createFormField('span', 2, 2),
+        /* {3rd,4th} element is not used */
+        led: this.createFormField('x-led', 5, 1)
       }
+      Object.keys(dom).forEach(node => grid.appendChild(dom[node]))
+      dom.led.on = true
+      dom.grid = grid
+      return dom
     }
 
-    onModelChange(value) {
-      this.createDeviceProxy(value)
-      this.restartPollingTimer()
+    createProxy (model) {
+      return new tangojs.proxy.DeviceProxy(model)
     }
 
-    /** @private */
-    createDeviceProxy (model) {
-      this._proxy = new tangojs.proxy.DeviceProxy(model)
-      this._proxy.get_info().then(deviceInfo => {
-        this.dom.name.textContent = this.showName ? deviceInfo.name : ''
+    readProxy (proxy) {
+      return proxy.state()
+    }
+
+    updateName () {
+      this.proxy[0].get_info().then(deviceInfo => {
+        this.dom.name.textContent = deviceInfo.name
       })
     }
 
-    /** @private */
-    restartPollingTimer () {
-
-      if (this._timer) {
-        clearInterval(this._timer)
-      }
-
-      this._timer = setInterval(() => {
-        this._proxy.state()
-          .then(devState => {
-            const [color, on] = this.getLedSetup(devState)
-            this.led.color = color
-            this.led.on = on
-            this.dom.value.textContent = devState.key
-          })
-          .catch(e => console.error(e))
-      }, this.pollPeriod)
+    onModelRead (states) {
+      const devState = states[0]
+      const [color, on] = this.getLedSetup(devState)
+      this.dom.value.textContent = devState.key
+      this.dom.led.color = color
+      this.dom.led.on = on
     }
 
-    /** @private */
     getLedSetup (devState) {
       switch (devState) {
         case tangojs.tango.DevState.ON: return ['#80FF00', true]
@@ -85,45 +66,42 @@
       }
     }
 
-    toggleLed (ledOn) {
-      const ledNode = this.root.querySelector('x-led')
-      if (ledOn && ! ledNode) {
-        this.dom.wrapper.appendChild(this.led)
-      } else if (! ledOn && ledNode) {
-        this.dom.wrapper.removeChild(this.led)
-      }
+    onShowLedChange (showLed) {
+      this.dom.led.style.display = showLed ? 'block' : 'none'
+    }
+
+    onShowNameChange (showName) {
+      this.dom.name.style.display = showName ? 'block' : 'none'
     }
   }
 
-  WebComponentElement.wireAttribute({
-    prototype: TangoJsStateLedElement.prototype,
-    property: 'model',
-    type: 'string',
-    onChange: TangoJsStateLedElement.prototype.onModelChange })
+  TangoJsElement.withPolledModel.call(TangoJsStateLedElement.prototype)
+  TangoJsElement.withFormElement.call(TangoJsStateLedElement.prototype)
 
-  WebComponentElement.wireAttribute({
-    prototype: TangoJsStateLedElement.prototype,
-    property: 'showLed',
-    type: 'boolean',
-    onChange: TangoJsStateLedElement.prototype.toggleLed })
+  WebComponentElement.wireAttributes(TangoJsStateLedElement.prototype, {
+    model: {
+      type: 'string',
+      onChange: function (model) {
+        this.onModelChange(model)
+        this.updateName()
+      }
+    },
+    pollPeriod: {
+      type: 'number',
+      onChange: TangoJsStateLedElement.prototype.onPollPeriodChange
+    },
+    showLed: {
+      type: 'boolean',
+      onChange: TangoJsStateLedElement.prototype.onShowLedChange
+    },
+    showName: {
+      type: 'boolean',
+      onChange: TangoJsStateLedElement.prototype.onShowNameChange
+    }
+  })
 
-  WebComponentElement.wireAttribute({
-    prototype: TangoJsStateLedElement.prototype,
-    property: 'pollPeriod',
-    type: 'number' })
+  TangoJsElement.registerComponent(TangoJsStateLedElement, 'tangojs-state-led')
 
-  WebComponentElement.wireAttribute({
-    prototype: TangoJsStateLedElement.prototype,
-    property: 'showName',
-    type: 'boolean' })
-
-  window.tangojsWebComponents = window.tangojsWebComponents || {}
-
-  WebComponentElement.registerComponent(window,
-                                        window.tangojsWebComponents,
-                                        TangoJsStateLedElement,
-                                        'tangojs-state-led')
-
-})()
+})(window)
 
 </script>

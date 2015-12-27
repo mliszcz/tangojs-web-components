@@ -1,6 +1,7 @@
 <!DOCTYPE html>
 
 <script type="text/javascript" src="../web-component-element.js"></script>
+<script type="text/javascript" src="../tangojs-element.js"></script>
 
 <template>
 
@@ -80,24 +81,19 @@
     }
   }
 
-  WebComponentElement.wireAttribute({
-    prototype: HTMLLedElement.prototype,
-    property: 'on',
-    type: 'boolean',
-    onChange: HTMLLedElement.prototype.toggleLed })
+  WebComponentElement.wireAttributes(HTMLLedElement.prototype, {
+    on: {
+      type: 'boolean',
+      onChange: HTMLLedElement.prototype.toggleLed
+    },
+    color: {
+      type: 'string',
+      value: '#000000',
+      onChange: HTMLLedElement.prototype.updateColorStyle
+    }
+  })
 
-  WebComponentElement.wireAttribute({
-    prototype: HTMLLedElement.prototype,
-    property: 'color',
-    value: '#000000',
-    onChange: HTMLLedElement.prototype.updateColorStyle })
-
-  window.tangojsWebComponents = window.tangojsWebComponents || {}
-
-  WebComponentElement.registerComponent(window,
-                                        window.tangojsWebComponents,
-                                        HTMLLedElement,
-                                        'x-led')
+  TangoJsElement.registerComponent(HTMLLedElement, 'x-led')
 
 })(window)
 

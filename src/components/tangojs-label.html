@@ -4,68 +4,68 @@
 <script type="text/javascript" src="../tangojs-element.js"></script>
 <link rel="import" href="html-led-element.html">
 
-<template>
-  <span id="wrapper">
-    <span id="name"></span>
-    <span id="value"></span>
-    <span id="unit"></span>
-  </span>
-</template>
-
 <script type="text/javascript">
 (function (window) {
   'use strict'
 
   const WebComponentElement = window.WebComponentElement
-  const document = window.document
   const tangojs = window.tangojs
-
-  const template = WebComponentElement
-    .getCurrentDocument(window)
-    .querySelector('template')
 
   class TangoJsLabelElement extends window.HTMLElement {
 
     createdCallback () {
-
-      const clone = document.importNode(template.content, true)
       this.root = this.createShadowRoot()
-      this.root.appendChild(clone)
-
-      this.led = document.createElement('x-led')
-      this.led.setAttribute('on', '')
-
-      this.dom = {
-        wrapper: this.root.getElementById('wrapper'),
-        name: this.root.getElementById('name'),
-        unit: this.root.getElementById('unit'),
-        value: this.root.getElementById('value')
-      }
+      this.dom = this.createLocalDom()
+      this.root.appendChild(this.dom.grid)
     }
 
-    /** @private */
+    createLocalDom () {
+      const grid = this.createFormGrid()
+      const dom = {
+        name: this.createFormField('span', 1, 1),
+        value: this.createFormField('span', 2, 1),
+        /* 3rd element is used in line-edit */
+        unit: this.createFormField('span', 4, 1),
+        led: this.createFormField('x-led', 5, 1)
+      }
+      Object.keys(dom).forEach(node => grid.appendChild(dom[node]))
+      dom.led.on = true
+      dom.grid = grid
+      return dom
+    }
+
+    createProxy (model) {
+      const [_, devname, name] = model.match(/^(.+)\/([A-Za-z0-9_]+)$/)
+      return new tangojs.proxy.AttributeProxy(devname, name)
+    }
+
+    readProxy (proxy) {
+      return proxy.read()
+    }
+
     updateNameAndUnit () {
-      this.proxy[0].get_info().then(attrInfo => {
-        this.dom.name.textContent = this.showName ? attrInfo.name : ''
-        this.dom.unit.textContent = this.showUnit ? attrInfo.display_unit : ''
+      this.proxy[0].get_info().then(attributeInfo => {
+        this.dom.name.textContent = attributeInfo.name
+        this.dom.unit.textContent = attributeInfo.display_unit
       })
     }
 
-    onAttributesRead (deviceAttributes) {
+    onModelRead (deviceAttributes) {
       const attribute = deviceAttributes[0]
-      const quality = attribute.quality
-      this.led.color = this.getQualityLedColor(quality)
-      this.dom.value.textContent = attribute.value
+      this.updateValueAndQuality(attribute.value, attribute.quality)
     }
 
-    onAttributesError (error) {
+    onModelError (error) {
       console.error(error)
-      const quality = tangojs.tango.AttrQuality.ATTR_INVALID
-      this.led.color = this.getQualityLedColor(quality)
-      this.dom.value.textContent = '-error-'
+      this.updateValueAndQuality('-error-',
+                                 tangojs.tango.AttrQuality.ATTR_INVALID)
     }
 
-    /** @private */
+    updateValueAndQuality (value, quality) {
+      this.dom.led.color = this.getQualityLedColor(quality)
+      this.dom.value.textContent = value
+    }
+
     getQualityLedColor (quality) {
       switch (quality) {
         case tangojs.tango.AttrQuality.ATTR_VALID: return '#80FF00'
@@ -73,61 +73,58 @@
         case tangojs.tango.AttrQuality.ATTR_ALARM: return '#FF0000'
         case tangojs.tango.AttrQuality.ATTR_CHANGING: return '#0080FF'
         case tangojs.tango.AttrQuality.ATTR_WARNING: return '#FFFF00'
+        default: return '#0000FF'
       }
     }
 
-    /** @private */
+    toggleVisibility (node, show) {
+      node.style.display = show ? 'flex' : 'none'
+    }
+
     onShowQualityChange (showQuality) {
-      const ledNode = this.root.querySelector('x-led')
-      if (showQuality && ! ledNode) {
-        this.dom.wrapper.appendChild(this.led)
-      } else if (! showQuality && ledNode) {
-        this.dom.wrapper.removeChild(this.led)
-      }
+      this.toggleVisibility(this.dom.led, showQuality)
+    }
+
+    onShowNameChange (showName) {
+      this.toggleVisibility(this.dom.name, showName)
+    }
+
+    onShowUnitChange (showUnit) {
+      this.toggleVisibility(this.dom.unit, showUnit)
     }
 
   }
 
-  TangoJsElement.withPolledModel.call(
-    TangoJsLabelElement.prototype,
-    tangojs.proxy.AttributeProxy,
-    TangoJsLabelElement.prototype.onAttributesRead,
-    TangoJsLabelElement.prototype.onAttributesError,
-    TangoJsLabelElement.prototype.updateNameAndUnit)
+  TangoJsElement.withPolledModel.call(TangoJsLabelElement.prototype)
+  TangoJsElement.withFormElement.call(TangoJsLabelElement.prototype)
 
-  WebComponentElement.wireAttribute({
-    prototype: TangoJsLabelElement.prototype,
-    property: 'model',
-    type: 'string',
-    onChange: TangoJsLabelElement.prototype.onModelChange })
+  WebComponentElement.wireAttributes(TangoJsLabelElement.prototype, {
+    model: {
+      type: 'string',
+      onChange: function (model) {
+        this.onModelChange(model)
+        this.updateNameAndUnit()
+      }
+    },
+    pollPeriod: {
+      type: 'number',
+      onChange: TangoJsLabelElement.prototype.onPollPeriodChange
+    },
+    showQuality: {
+      type: 'boolean',
+      onChange: TangoJsLabelElement.prototype.onShowQualityChange
+    },
+    showName: {
+      type: 'boolean',
+      onChange: TangoJsLabelElement.prototype.onShowNameChange
+    },
+    showUnit: {
+      type: 'boolean',
+      onChange: TangoJsLabelElement.prototype.onShowUnitChange
+    }
+  })
 
-  WebComponentElement.wireAttribute({
-    prototype: TangoJsLabelElement.prototype,
-    property: 'showQuality',
-    type: 'boolean',
-    onChange: TangoJsLabelElement.prototype.onShowQualityChange })
-
-  WebComponentElement.wireAttribute({
-    prototype: TangoJsLabelElement.prototype,
-    property: 'pollPeriod',
-    type: 'number' })
-
-  WebComponentElement.wireAttribute({
-    prototype: TangoJsLabelElement.prototype,
-    property: 'showName',
-    type: 'boolean' })
-
-  WebComponentElement.wireAttribute({
-    prototype: TangoJsLabelElement.prototype,
-    property: 'showUnit',
-    type: 'boolean' })
-
-  window.tangojsWebComponents = window.tangojsWebComponents || {}
-
-  WebComponentElement.registerComponent(window,
-                                        window.tangojsWebComponents,
-                                        TangoJsLabelElement,
-                                        'tangojs-label')
+  TangoJsElement.registerComponent(TangoJsLabelElement, 'tangojs-label')
 
 })(window)
 

@@ -3,12 +3,6 @@
 <script type="text/javascript" src="../web-component-element.js"></script>
 <script type="text/javascript" src="../tangojs-element.js"></script>
 
-<template>
-  <div id="plot-container" style="width: 680px; height: 600px; display: inline-block;">
-    <canvas id="plot-canvas" style="width:100%;height:100%"></canvas>
-  </div>
-</template>
-
 <script type="text/javascript">
 (function (window) {
   'use strict'
@@ -16,10 +10,7 @@
   const WebComponentElement = window.WebComponentElement
   const TangoJsElement = window.TangoJsElement
   const document = window.document
-
-  const template = WebComponentElement
-    .getCurrentDocument(window)
-    .querySelector('template')
+  const tangojs = window.tangojs
 
   class SeededPrng {
     constructor (seed) {
@@ -37,6 +28,7 @@
 
   const plotOptions = {
     responsive: true,
+    maintainAspectRatio: true,
     animation: {
       duration: 0 // the plot is unreadable with animation
       // easing: 'easeOutBack'
@@ -70,27 +62,63 @@
   class TangoJsTrendElement extends window.HTMLElement {
 
     createdCallback () {
+      this.root = this.createShadowRoot()
+      this.dom = this.createLocalDom()
+      this.root.appendChild(this.dom.grid)
+      this.plot = this.createPlot(this.dom.canvas.getContext('2d'))
+    }
 
-      const clone = document.importNode(template.content, true)
-      this._root = this.createShadowRoot()
-      this._root.appendChild(clone)
+    createLocalDom () {
+      const grid = document.createElement('div')
+      const canvas = document.createElement('canvas')
+      grid.appendChild(canvas)
+      return { grid, canvas }
+    }
 
-      const ctx = this._root.getElementById('plot-canvas').getContext('2d')
-
-      this._plotData = {
+    createPlot (context) {
+      const data = {
         labels: [new Date()],
         datasets: []
       }
-
-      this._plot = new Chart(ctx, {
+      const chart = new Chart(context, {
         type: 'line',
-        data: this._plotData,
+        data: data,
         options: plotOptions
       })
+      return { data, chart }
     }
 
-    afterModelChange(modelArray) {
-      this._plotData.datasets = modelArray.map(model => {
+    createProxy (model) {
+      const [_, devname, name] = model.match(/^(.+)\/([A-Za-z0-9_]+)$/)
+      return new tangojs.proxy.AttributeProxy(devname, name)
+    }
+
+    readProxy (proxy) {
+      return proxy.read()
+    }
+
+    onModelRead (deviceAttributes) {
+
+      const readDate = (new Date()).getTime()
+
+      this.plot.data.labels = [readDate]
+      deviceAttributes.forEach((devAttr, i) => {
+        const dataset = this.plot.data.datasets[i].data
+        dataset.push({ x: readDate, y: devAttr.value })
+        this.trimDataset(dataset)
+      })
+
+      this.plot.chart.update()
+    }
+
+    trimDataset (dataset) {
+      while (dataset.length > this.dataLimit) {
+        dataset.shift()
+      }
+    }
+
+    recreateDatasets (modelArray) {
+      this.plot.data.datasets = modelArray.map(model => {
         return {
           label: model,
           data: [],
@@ -100,53 +128,29 @@
       })
     }
 
-    onAttributesRead(deviceAttributes) {
-
-      const readDate = (new Date()).getTime()
-
-      this._plotData.labels = [readDate]
-      deviceAttributes.forEach((devAttr, i) => {
-        this._plotData.datasets[i].data.push({
-          x: readDate,
-          y: devAttr.value
-        })
-        while (this._plotData.datasets[i].data.length > this.dataLimit) {
-          this._plotData.datasets[i].data.shift()
-        }
-      })
-      this._plot.update()
-    }
   }
 
-  TangoJsElement.withPolledModel.call(
-    TangoJsTrendElement.prototype,
-    tangojs.proxy.AttributeProxy,
-    TangoJsTrendElement.prototype.onAttributesRead,
-    () => {},
-    TangoJsTrendElement.prototype.afterModelChange)
+  TangoJsElement.withPolledModel.call(TangoJsTrendElement.prototype)
+  TangoJsElement.withFormElement.call(TangoJsTrendElement.prototype)
 
-  WebComponentElement.wireAttribute({
-    prototype: TangoJsTrendElement.prototype,
-    property: 'model',
-    type: 'array',
-    onChange: TangoJsTrendElement.prototype.onModelChange })
+  WebComponentElement.wireAttributes(TangoJsTrendElement.prototype, {
+    model: {
+      type: 'array',
+      onChange: function (model) {
+        this.onModelChange(model)
+        this.recreateDatasets(model)
+      }
+    },
+    pollPeriod: {
+      type: 'number',
+      onChange: TangoJsTrendElement.prototype.onPollPeriodChange
+    },
+    dataLimit: {
+      type: 'number'
+    }
+  })
 
-  WebComponentElement.wireAttribute({
-    prototype: TangoJsTrendElement.prototype,
-    property: 'dataLimit',
-    type: 'number'})
-
-  WebComponentElement.wireAttribute({
-    prototype: TangoJsTrendElement.prototype,
-    property: 'pollPeriod',
-    type: 'number' })
-
-  window.tangojsWebComponents = window.tangojsWebComponents || {}
-
-  WebComponentElement.registerComponent(window,
-                                        window.tangojsWebComponents,
-                                        TangoJsTrendElement,
-                                        'tangojs-trend')
+  TangoJsElement.registerComponent(TangoJsTrendElement, 'tangojs-trend')
 
 })(window)
 
