@@ -44,7 +44,7 @@ components are created. Example:
     [HTMLImports polyfill](http://webcomponents.org/polyfills/html-imports/)
   * applying [this patch](https://gist.github.com/d11ea630cc777012d69b.git)
     just before the polyfill is loaded
-* ~~Chrome 49+~~ (*currently not supported*)
+* Google Chrome 49+
 
 ## Components
 

@@ -1,168 +1,303 @@
 (function (window) {
   'use strict'
 
-  const _attrMap = Symbol.for('attributeMapping')
-  const _attrChg = Symbol.for('selfAttributeChage')
+  const console = window.console
 
-  /**
-   * Base class for all components.
-   * Handles attribute - property synchronization.
+  /** Declare simple property with accessors.
+   * @param {Object} prototype property host
+   * @param {string} property  property name
    */
-  const WebComponentElement = function () {}
-  WebComponentElement.prototype = Object.create(HTMLElement.prototype)
-
-  /**
-   * Component initialization. Invalidates all attributes, enforcing calls to
-   * attributeChangedCallback. Shlould be invoked by subclass before specific
-   * subclass logic.
-   */
-  WebComponentElement.prototype.createdCallback = function () {
-
-    // indicates that there was change in specified attribute
-    this[_attrChg] = {}
-
-    for (let i=0; i<this.attributes.length; ++i) {
-      this.attributeChangedCallback(this.attributes[i].name,
-                                    null,
-                                    this.attributes[i].value)
-    }
-  }
-
-  /**
-   * Reflects change in an attribute into the corresponding property.
-   */
-  WebComponentElement.prototype.attributeChangedCallback = function (attribute,
-                                                                     oldValue,
-                                                                     newValue) {
-    const mapping = (Object.getPrototypeOf(this)[_attrMap] || {})[attribute]
-
-    if (mapping && mapping.mapTo) {
-      if (this[_attrChg][attribute]) {
-        // prevent re-setting when this callback
-        // was triggered by property change
-        this[_attrChg][attribute] = undefined
-      } else {
-        this[mapping.property] = mapping.mapToFn(newValue)
-      }
-    }
-  }
-
-  /**
-   * Attaches attributeMapping to given prototype and intercepts all relevant
-   * setters for attribute mapping purposes.
-   * @param {Object} prototype        Prototype for attribute binding. Should
-   *                                  inherit from WebComponentElement.
-   * @param {Object} attributeMapping Object containing attribute mapping
-   *                                  information or String denoting attribute
-   *                                  type.
-   * @example
-   * WebComponentElement.bindAttributes(MyAmazingElement.prototype, {
-   *   'attribute1': {
-   *     property: 'property1', // defaults to attribute name
-   *     type: 'string'  // optional
-   *     mapTo: true,    // should map attribute -> property ? (default: true)
-   *     mapFrom: true,  // should map property -> attribute ? (default: true)
-   *     mapToFn: <fn>,  // mapping function (default depends on type)
-   *     mapFromFn: <fn> // as above
-   *   }
-   * })
-   */
-  WebComponentElement.bindAttributes = function (prototype, attributeMapping) {
-
-    const boolOr = (val, def) => (val === true || val === false) ? val : def
-
-    const converter = (type) => {
-      switch (type) {
-        case 'string': return { to: v => v, from: v => v }
-        case 'boolean': return { to: v => true, from: v => '' }
-        case 'number':
-        default: return { to: JSON.parse, from: JSON.stringify }
-      }
-    }
-
-    const hypenated = (s) => s.replace(/([a-z])([A-Z])/g, '$1-$2').toLowerCase()
-    const camelCase = (s) => s.replace(/-([a-z])/g, (g) => g[1].toUpperCase())
-
-    const getPropertyDescriptor = (object, property) => {
-      if (object) {
-        const descriptor = Object.getOwnPropertyDescriptor(object, property)
-        return descriptor || getPropertyDescriptor(
-          Object.getPrototypeOf(object), property)
-      }
-    }
-
-    // attach mapping for reuse in WebComponentElement prototype methods
-    prototype[_attrMap] = attributeMapping
-
-    // intercept setters
-    Object.keys(attributeMapping).forEach(attribute => {
-
-      if (typeof attributeMapping[attribute] === 'string') {
-        attributeMapping[attribute] = { type: attributeMapping[attribute] }
-      }
-
-      const mapping = attributeMapping[attribute]
-
-      attribute = hypenated(attribute)
-      attributeMapping[attribute] = mapping
-
-      mapping.property = mapping.property || camelCase(attribute)
-      const property = mapping.property
-
-      mapping.mapTo = boolOr(mapping.mapTo, true)
-      mapping.mapFrom = boolOr(mapping.mapFrom, true)
-
-      const converters = converter(mapping.type)
-      mapping.mapToFn = mapping.mapToFn || converters.to
-      mapping.mapFromFn = mapping.mapFromFn || converters.from
-
-      const descriptor = getPropertyDescriptor(prototype, property)
-
-      if (mapping.mapFrom) {
-        if (descriptor && descriptor.configurable) {
-
-          const setter = descriptor.set
-          descriptor.set = function (value) {
-            setter.call(this, value)
-            this[_attrChg][attribute] = true
-            if (mapping.type === 'boolean' && !value) {
-              this.removeAttribute(attribute)
-            } else {
-              this.setAttribute(attribute, mapping.mapFromFn(value))
-            }
-          }
-          Object.defineProperty(prototype, property, descriptor)
-
-        } else {
-          console.error(`Property ${property} does not exists ` +
-                        `or in non-configurable`)
-        }
-      }
+  function defineSimpleProperty(prototype, property) {
+    const key = Symbol.for(`__${property}`)
+    Object.defineProperty(prototype, property, {
+      configurable: true,
+      get: function () { return this[key] },
+      set: function (value) { this[key] = value }
     })
   }
 
-  /**
-   * Defines property accessors on given prototype. This will become obsolete
-   * when ES7 Class Fields are finally shipped.
-   * @param {Object}   prototype  Prototype for defining properties.
-   * @param {String[]} properties Array of property names.
+  /** Returns property descriptor found in prototype chain.
+   * @param {Object} object   target object
+   * @param {string} property property name
+   * @return {Object} property descriptor
    */
-  WebComponentElement.defineProperties = function (prototype, properties) {
-    properties.forEach(property =>
-      Object.defineProperty(prototype, property, {
-        configurable: true,
-        get: function () {
-          return this[`_${property}`]
-        },
-        set: function (value) {
-          this[`_${property}`] = value
+  function getPropertyDescriptor(object, property) {
+    if (object) {
+      const descriptor = Object.getOwnPropertyDescriptor(object, property)
+      return descriptor || getPropertyDescriptor(Object.getPrototypeOf(object),
+                                                 property)
+    }
+  }
+
+  /** Attribute-property synchronization context for interceptors. */
+  class AttributeSynchronizationContext {
+
+    /**
+     * @param {Object}   prototype target prototype
+     * @param {string}   attribute attribute name
+     * @param {string}   property  property name
+     * @param {string}   type      attribute type
+     * @param {Object}   value     default value
+     * @param {Function} onChange  on-change callback
+     */
+    constructor(prototype,
+                attribute,
+                property,
+                type,
+                value,
+                onChange) {
+
+      /** @private */
+      this.ctx = {
+        prototype,
+        attribute,
+        property,
+        type,
+        value,
+        onChange,
+
+        syncFromAttr: Symbol(),
+        syncFromProp: Symbol(),
+
+        enableOnChange: Symbol(),
+
+        converters: this.createConverters(type)
+      }
+    }
+
+    /** Transform string into hypenated form.
+     * @param {string} s input string
+     * @return {string} s-in-hypenated-form
+     */
+    static hypenatedForm(s) {
+      return s.replace(/([a-z])([A-Z])/g, '$1-$2').toLowerCase()
+    }
+
+    /** Transform string into camel-cased form.
+     * @param {string} s input string
+     * @return {string} sInCamelCasedForm
+     */
+    static camelCasedForm(s) {
+      return s.replace(/-([a-z])/g, (g) => g[1].toUpperCase())
+    }
+
+    /** Create converter function.
+     * @param {string} type attribute type
+     * @return {{attrToProp: Function, propToAttr: Function}}
+     * @private
+     */
+    createConverters(type) {
+      if (Array.isArray(type)) {
+        const [first, ...rest] = type
+        if (first == 'function') {
+          return {
+            attrToProp: v => new Function(...rest, v),
+            propToAttr: v => v
+          }
+        } else {
+          return {
+            attrToProp: v => v,
+            propToAttr: v => v
+          }
         }
-      })
-    )
+      }
+      switch (type) {
+        case 'string': return {
+          attrToProp: v => v,
+          propToAttr: v => v
+        }
+        case 'boolean': return {
+          attrToProp: v => v !== null,
+          propToAttr: v => ''
+        }
+        case 'number':
+        default: return {
+          attrToProp: JSON.parse,
+          propToAttr: JSON.stringify
+        }
+      }
+    }
+
+    /** Intercept property setter in given context. */
+    interceptPropertySetter() {
+
+      const ctx = this.ctx
+      const descriptor = getPropertyDescriptor(ctx.prototype, ctx.property)
+      const setter = descriptor.set
+
+      descriptor.set = function (value) {
+
+        setter.call(this, value)
+
+        if (! this[ctx.syncFromAttr]) {
+
+          if (ctx.type === 'boolean' && !value) {
+            this.removeAttribute(ctx.attribute)
+          } else {
+            if (ctx.type[0] !== 'function') {
+              // FIXME add support for setting function
+              this[ctx.syncFromProp] = true
+              this.setAttribute(ctx.attribute,
+                                ctx.converters.propToAttr(value))
+            }
+          }
+          if (this[ctx.enableOnChange]) {
+            ctx.onChange.call(this, value)
+          }
+        } else {
+          this[ctx.syncFromAttr] = false
+        }
+      }
+
+      Object.defineProperty(ctx.prototype, ctx.property, descriptor)
+    }
+
+    /** Intercept ACC in given context. */
+    interceptAttributeChangedCallback() {
+
+      const ctx = this.ctx
+      const attributeChangedCallback =
+        ctx.prototype.attributeChangedCallback || (() => {})
+
+      ctx.prototype.attributeChangedCallback = function (attribute,
+                                                         oldValue,
+                                                         newValue) {
+        if (attribute === ctx.attribute) {
+
+          if (! this[ctx.syncFromProp]) {
+
+            this[ctx.syncFromAttr] = true
+
+            const value = ctx.converters.attrToProp(newValue)
+            this[ctx.property] = value
+            if (this[ctx.enableOnChange]) {
+              ctx.onChange.call(this, value)
+            }
+          } else {
+            this[ctx.syncFromProp] = false
+          }
+        } else {
+          attributeChangedCallback.call(this, attribute, oldValue, newValue)
+        }
+      }
+    }
+
+    /** Intercept CC in given context.
+     * @param {boolean} toProperty   synchronize attribute to property
+     * @param {boolean} fromProperty synchronize property to attribute
+     */
+    interceptCreatedCallback(toProperty, fromProperty) {
+
+      const ctx = this.ctx
+
+      const createdCallback = ctx.prototype.createdCallback || (() => {})
+
+      ctx.prototype.createdCallback = function () {
+
+        this[ctx.enableOnChange] = false
+
+        const attrValue = this.getAttribute(ctx.attribute)
+        const propValue = this[ctx.property]
+        const validAttr = (ctx.type === 'boolean' || attrValue !== null)
+        const validProp = (propValue !== null && propValue !== undefined)
+
+        if (toProperty) {
+          if (validAttr) {
+            this[ctx.property] = ctx.converters.attrToProp(attrValue)
+          } else if (! validProp) {
+            this[ctx.property] = ctx.value
+          }
+        } else if (fromProperty && ! validAttr) {
+          if (validProp) {
+            this.setAttribute(ctx.converters.propToAttr(propValue))
+          } else {
+            this.setAttribute(ctx.converters.propToAttr(ctx.value))
+          }
+        }
+
+        createdCallback.call(this)
+
+        if (toProperty) {
+          ctx.onChange.call(this, this[ctx.property])
+        } else {
+          const attrVal = this.getAttribute(ctx.attribute)
+          const value = ctx.converters.attrToProp(attrVal)
+          ctx.onChange.call(this, value)
+        }
+
+        this[ctx.enableOnChange] = true
+      }
+    }
   }
 
   /**
-   * @return {Object} window Current document.
+   * Base class for all components.
+   */
+  function WebComponentElement() { }
+
+  window.WebComponentElement = WebComponentElement
+
+  /** Setup synchronization between property and attribute
+   * @param {Object}   param
+   * @param {Object}   param.prototype    target prototype
+   * @param {string}   param.attribute    attribute name
+   * @param {string}   param.property     property name
+   * @param {string}   param.type         attribute type
+   * @param {Object}   param.value        default value
+   * @param {boolean}  param.toProperty   sync attribute to property
+   * @param {boolean}  param.fromProperty sync property to attribute
+   * @param {Function} param.onChange     on-change callback
+   */
+  WebComponentElement.wireAttribute = function ({prototype,
+                                                 attribute,
+                                                 property,
+                                                 type,
+                                                 value,
+                                                 toProperty,
+                                                 fromProperty,
+                                                 onChange}) {
+
+    const boolOr = (val, def) => (val === true || val === false) ? val : def
+    toProperty = boolOr(toProperty, true)
+    fromProperty = boolOr(fromProperty, true)
+
+    attribute = attribute || property
+    attribute = AttributeSynchronizationContext.hypenatedForm(attribute)
+    property = AttributeSynchronizationContext.camelCasedForm(property)
+
+    const ctx = new AttributeSynchronizationContext(prototype,
+                                                    attribute,
+                                                    property,
+                                                    type || 'string',
+                                                    value,
+                                                    onChange || (() => {}))
+
+    ctx.interceptCreatedCallback(toProperty, fromProperty)
+
+    if (toProperty) {
+      ctx.interceptAttributeChangedCallback()
+    }
+
+    if (fromProperty) {
+
+      if (! getPropertyDescriptor(prototype, property)) {
+        defineSimpleProperty(prototype, property)
+      }
+
+      const descriptor = getPropertyDescriptor(prototype, property)
+
+      if (descriptor.configurable && descriptor.set) {
+        ctx.interceptPropertySetter()
+      } else {
+        throw new Error(`property ${property} is non-configurable `
+                        + `or setter is missing`)
+      }
+    }
+  }
+
+  /** Returns owner document for current script.
+   * @param {Object} window object
+   * @return {Object} current document
    */
   WebComponentElement.getCurrentDocument = function (window) {
     const document = window.document
@@ -172,20 +307,19 @@
 
   /**
    * Registers component and attaches it to global object.
-   * @param {Object} window          Global object.
-   * @param {Object} constructor     Constructor function.
-   * @param {String} htmlElementName Name to register as HTML element.
-   * @param {String} prototypeName   Constructor name to register in global.
+   * @param {Object} window          window object
+   * @param {Object} globalHost      global object to attach constructor
+   * @param {Object} constructor     constructor function
+   * @param {string} htmlElementName name to register as HTML element
+   * @return {Object} constructor function
    */
   WebComponentElement.registerComponent = function (window,
+                                                    globalHost,
                                                     constructor,
-                                                    htmlElementName,
-                                                    prototypeName) {
-    window.document.registerElement(htmlElementName, constructor)
-    window.tangojsWebComponents = window.tangojsWebComponents || {}
-    window.tangojsWebComponents[prototypeName] = constructor
+                                                    htmlElementName) {
+    const ctor = window.document.registerElement(htmlElementName, constructor)
+    globalHost[constructor.name] = ctor
+    return ctor
   }
-
-  window.WebComponentElement = WebComponentElement
 
 })(window)

@@ -32,8 +32,11 @@
 </template>
 
 <script type="text/javascript">
-(function() {
+(function (window) {
   'use strict'
+
+  const WebComponentElement = window.WebComponentElement
+  const document = window.document
 
   const template = WebComponentElement
     .getCurrentDocument(window)
@@ -41,26 +44,16 @@
 
   const hexColorRegex = /^#([0-9A-Fa-f]{2})([0-9A-Fa-f]{2})([0-9A-Fa-f]{2})$/
 
-  class HTMLLedElement extends WebComponentElement {
+  class HTMLLedElement extends window.HTMLElement {
 
-    get color () {
-      return this._color
+    createdCallback () {
+      const clone = document.importNode(template.content, true)
+      this.root = this.createShadowRoot()
+      this.root.appendChild(clone)
     }
 
-    set color (value) {
-      this.updateColorStyle(value)
-      this._color = value
-    }
-
-    get on () {
-      return this._on
-    }
-
-    set on (value) {
-      this._on = value
-      if (this.color) {
-        this.updateColorStyle(this.color)
-      }
+    toggleLed () {
+      this.updateColorStyle(this.color)
     }
 
     updateColorStyle (hexColor) {
@@ -80,33 +73,32 @@
           0 2px 12px rgba(${decR}, ${decG}, ${decB}, 0.5)`
         : `inset 0 -1px 9px rgb(${insR}, ${insG}, ${insB})`
 
-      Object.assign(this._root.querySelector('.led').style, {
+      Object.assign(this.root.querySelector('.led').style, {
         backgroundColor: `rgb(${colR}, ${colG}, ${colB})`,
         boxShadow: shadow
       })
     }
-
-    createdCallback () {
-
-      const clone = document.importNode(template.content, true)
-      this._root = this.createShadowRoot()
-      this._root.appendChild(clone)
-
-      super.createdCallback()
-    }
   }
 
-  WebComponentElement.bindAttributes(
-    HTMLLedElement.prototype,
-    {
-      'color': 'string',
-      'on': 'boolean'
-    })
+  WebComponentElement.wireAttribute({
+    prototype: HTMLLedElement.prototype,
+    property: 'on',
+    type: 'boolean',
+    onChange: HTMLLedElement.prototype.toggleLed })
+
+  WebComponentElement.wireAttribute({
+    prototype: HTMLLedElement.prototype,
+    property: 'color',
+    value: '#000000',
+    onChange: HTMLLedElement.prototype.updateColorStyle })
+
+  window.tangojsWebComponents = window.tangojsWebComponents || {}
 
   WebComponentElement.registerComponent(window,
+                                        window.tangojsWebComponents,
                                         HTMLLedElement,
-                                        'x-led',
-                                        'HTMLLedElement')
-})()
+                                        'x-led')
+
+})(window)
 
 </script>

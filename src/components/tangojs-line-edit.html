@@ -4,8 +4,12 @@
 <link rel="import" href="tangojs-label.html">
 
 <script type="text/javascript">
-(function() {
+(function (window) {
   'use strict'
+
+  const WebComponentElement = window.WebComponentElement
+  const document = window.document
+  const tangojs = window.tangojs
 
   const template = WebComponentElement
     .getCurrentDocument(window)
@@ -19,43 +23,29 @@
 
       super.createdCallback()
 
-      const wrapper = this._root.getElementById('wrapper')
-      const value = this._root.getElementById('value')
-
-      const input = window.document.createElement('input');
+      const input = window.document.createElement('input')
       input.setAttribute('id', 'input')
-
-      wrapper.insertBefore(input, value.nextSibling);
-
       input.oninput = (event) => this.onInput(event)
+
+      this.dom.wrapper.insertBefore(input, this.dom.value.nextSibling)
     }
 
     onInput (event) {
       const deviceAttribute = new tangojs.struct.DeviceAttribute({
         value: event.target.value
       })
-      this._proxy.write(deviceAttribute).catch(e => console.error(e))
+      this.proxy[0]
+        .write(deviceAttribute)
+        .catch(e => console.error(e))
     }
   }
 
-  WebComponentElement.defineProperties(
-    TangoJsLineEditElement.prototype,
-    ['pollPeriod', 'showName', 'showUnit'])
-
-  WebComponentElement.bindAttributes(
-    TangoJsLineEditElement.prototype,
-    {
-      'model': 'string',
-      'pollPeriod': 'number',
-      'showName': 'boolean',
-      'showUnit': 'boolean',
-      'showQuality': 'boolean'
-    })
+  window.tangojsWebComponents = window.tangojsWebComponents || {}
 
   WebComponentElement.registerComponent(window,
+                                        window.tangojsWebComponents,
                                         TangoJsLineEditElement,
-                                        'tangojs-line-edit',
-                                        'TangoJsLineEditElement')
-})()
+                                        'tangojs-line-edit')
+})(window)
 
 </script>

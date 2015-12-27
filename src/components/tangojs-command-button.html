@@ -9,24 +9,18 @@
 </template>
 
 <script type="text/javascript">
-(function() {
+(function (window) {
   'use strict'
+
+  const WebComponentElement = window.WebComponentElement
+  const document = window.document
+  const tangojs = window.tangojs
 
   const template = WebComponentElement
     .getCurrentDocument(window)
     .querySelector('template')
 
-  class TangoJsCommandButtonElement extends WebComponentElement {
-
-    get model() {
-      return this._model
-    }
-
-    set model(value) {
-      const [_, devname, cmdname] = value.match(/^(.+)\/([A-Za-z0-9_]+)$/)
-      this._proxy = new tangojs.proxy.CommandProxy(devname, cmdname)
-      this._model = value
-    }
+  class TangoJsCommandButtonElement extends window.HTMLElement {
 
     createdCallback () {
 
@@ -36,8 +30,11 @@
 
       const button = this._root.querySelector('button')
       button.onclick = (event) => this.onClick(event)
+    }
 
-      super.createdCallback()
+    onModelChange (value) {
+      const [_, devname, cmdname] = value.match(/^(.+)\/([A-Za-z0-9_]+)$/)
+      this._proxy = new tangojs.proxy.CommandProxy(devname, cmdname)
     }
 
     onClick (event) {
@@ -45,28 +42,36 @@
       this._proxy.inout(devDataIn)
         .then(devDataOut => devDataOut.value)
         .then(value => {
-            if (this.onresult && this.onresult.call) {
+          if (this.onresult && this.onresult.call) {
             this.onresult.call(this, value)
           }
         })
     }
   }
 
-  WebComponentElement.defineProperties(
-    TangoJsCommandButtonElement.prototype,
-    ['parameters', 'onresult'])
+  WebComponentElement.wireAttribute({
+    prototype: TangoJsCommandButtonElement.prototype,
+    property: 'model',
+    type: 'string',
+    onChange: TangoJsCommandButtonElement.prototype.onModelChange })
 
-  WebComponentElement.bindAttributes(
-    TangoJsCommandButtonElement.prototype,
-    {
-      'model': 'string',
-      'parameters': 'object'
-    })
+  WebComponentElement.wireAttribute({
+    prototype: TangoJsCommandButtonElement.prototype,
+    property: 'parameters',
+    type: 'object' })
+
+  WebComponentElement.wireAttribute({
+    prototype: TangoJsCommandButtonElement.prototype,
+    property: 'onresult',
+    type: ['function', 'event'] })
+
+  window.tangojsWebComponents = window.tangojsWebComponents || {}
 
   WebComponentElement.registerComponent(window,
+                                        window.tangojsWebComponents,
                                         TangoJsCommandButtonElement,
-                                        'tangojs-command-button',
-                                        'TangoJsCommandButtonElement')
-})()
+                                        'tangojs-command-button')
+
+})(window)
 
 </script>

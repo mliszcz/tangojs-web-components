@@ -1,6 +1,7 @@
 <!DOCTYPE html>
 
 <script type="text/javascript" src="../web-component-element.js"></script>
+<script type="text/javascript" src="../tangojs-element.js"></script>
 <link rel="import" href="html-led-element.html">
 
 <template>
@@ -12,72 +13,56 @@
 </template>
 
 <script type="text/javascript">
-(function() {
+(function (window) {
   'use strict'
+
+  const WebComponentElement = window.WebComponentElement
+  const document = window.document
+  const tangojs = window.tangojs
 
   const template = WebComponentElement
     .getCurrentDocument(window)
     .querySelector('template')
 
-  class TangoJsLabelElement extends WebComponentElement {
+  class TangoJsLabelElement extends window.HTMLElement {
 
-    get model() {
-      return this._model
-    }
+    createdCallback () {
 
-    set model(value) {
-      this.createAttributeProxy(value)
-      this.updateNameAndUnit()
-      this.restartPollingTimer()
-      this._model = value
-    }
+      const clone = document.importNode(template.content, true)
+      this.root = this.createShadowRoot()
+      this.root.appendChild(clone)
 
-    get showQuality () {
-      return this._showQuality
-    }
+      this.led = document.createElement('x-led')
+      this.led.setAttribute('on', '')
 
-    set showQuality (value) {
-      this.toggleQualityLed(value)
-      this._showQuality = value
-    }
-
-    /** @private */
-    createAttributeProxy (model) {
-      const [_, devname, attrname] = model.match(/^(.+)\/([A-Za-z0-9_]+)$/)
-      this._proxy = new tangojs.proxy.AttributeProxy(devname, attrname)
+      this.dom = {
+        wrapper: this.root.getElementById('wrapper'),
+        name: this.root.getElementById('name'),
+        unit: this.root.getElementById('unit'),
+        value: this.root.getElementById('value')
+      }
     }
 
     /** @private */
     updateNameAndUnit () {
-      this._proxy.get_info().then(attributeInfo => {
-        this._root.getElementById('name').textContent
-          = this.showName ? attributeInfo.name : ''
-        this._root.getElementById('unit').textContent
-          = this.showUnit ? attributeInfo.display_unit : ''
+      this.proxy[0].get_info().then(attrInfo => {
+        this.dom.name.textContent = this.showName ? attrInfo.name : ''
+        this.dom.unit.textContent = this.showUnit ? attrInfo.display_unit : ''
       })
     }
 
-    /** @private */
-    restartPollingTimer () {
-      const value = this._root.getElementById('value')
+    onAttributesRead (deviceAttributes) {
+      const attribute = deviceAttributes[0]
+      const quality = attribute.quality
+      this.led.color = this.getQualityLedColor(quality)
+      this.dom.value.textContent = attribute.value
+    }
 
-      if (this._timer) {
-        clearInterval(this._timer)
-      }
-
-      this._timer = setInterval(() => {
-        this._proxy.read()
-          .then(deviceAttribute => {
-            this._led.color = this.getQualityLedColor(deviceAttribute.quality)
-            value.textContent = deviceAttribute.value
-          })
-          .catch(error => {
-            console.error(error)
-            this._led.color = this.getQualityLedColor(
-              tangojs.tango.AttrQuality.ATTR_INVALID)
-            value.textContent = '-error-'
-          })
-      }, this.pollPeriod)
+    onAttributesError (error) {
+      console.error(error)
+      const quality = tangojs.tango.AttrQuality.ATTR_INVALID
+      this.led.color = this.getQualityLedColor(quality)
+      this.dom.value.textContent = '-error-'
     }
 
     /** @private */
@@ -92,46 +77,58 @@
     }
 
     /** @private */
-    toggleQualityLed (newShowQuality) {
-      if (newShowQuality && !this.showQuality) {
-        this._root.getElementById('wrapper').appendChild(this._led)
-      } else if (!newShowQuality && this.showQuality) {
-        this._root.getElementById('wrapper').removeChild(this._led)
+    onShowQualityChange (showQuality) {
+      const ledNode = this.root.querySelector('x-led')
+      if (showQuality && ! ledNode) {
+        this.dom.wrapper.appendChild(this.led)
+      } else if (! showQuality && ledNode) {
+        this.dom.wrapper.removeChild(this.led)
       }
     }
 
-    createdCallback () {
-
-      const clone = document.importNode(template.content, true)
-      this._root = this.createShadowRoot()
-      this._root.appendChild(clone)
-
-      this._led = document.createElement('x-led')
-      this._led.setAttribute('color', '#FF0000')
-      this._led.setAttribute('on', '')
-
-      super.createdCallback()
-    }
   }
 
-  WebComponentElement.defineProperties(
+  TangoJsElement.withPolledModel.call(
     TangoJsLabelElement.prototype,
-    ['pollPeriod', 'showName', 'showUnit'])
+    tangojs.proxy.AttributeProxy,
+    TangoJsLabelElement.prototype.onAttributesRead,
+    TangoJsLabelElement.prototype.onAttributesError,
+    TangoJsLabelElement.prototype.updateNameAndUnit)
 
-  WebComponentElement.bindAttributes(
-    TangoJsLabelElement.prototype,
-    {
-      'model': 'string',
-      'pollPeriod': 'number',
-      'showName': 'boolean',
-      'showUnit': 'boolean',
-      'showQuality': 'boolean'
-    })
+  WebComponentElement.wireAttribute({
+    prototype: TangoJsLabelElement.prototype,
+    property: 'model',
+    type: 'string',
+    onChange: TangoJsLabelElement.prototype.onModelChange })
+
+  WebComponentElement.wireAttribute({
+    prototype: TangoJsLabelElement.prototype,
+    property: 'showQuality',
+    type: 'boolean',
+    onChange: TangoJsLabelElement.prototype.onShowQualityChange })
+
+  WebComponentElement.wireAttribute({
+    prototype: TangoJsLabelElement.prototype,
+    property: 'pollPeriod',
+    type: 'number' })
+
+  WebComponentElement.wireAttribute({
+    prototype: TangoJsLabelElement.prototype,
+    property: 'showName',
+    type: 'boolean' })
+
+  WebComponentElement.wireAttribute({
+    prototype: TangoJsLabelElement.prototype,
+    property: 'showUnit',
+    type: 'boolean' })
+
+  window.tangojsWebComponents = window.tangojsWebComponents || {}
 
   WebComponentElement.registerComponent(window,
+                                        window.tangojsWebComponents,
                                         TangoJsLabelElement,
-                                        'tangojs-label',
-                                        'TangoJsLabelElement')
-})()
+                                        'tangojs-label')
+
+})(window)
 
 </script>
