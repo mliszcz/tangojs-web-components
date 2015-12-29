@@ -1,0 +1,141 @@
+<!DOCTYPE html>
+
+<script type="text/javascript" src="../web-component-element.js"></script>
+<script type="text/javascript" src="../tangojs-element.js"></script>
+
+<script type="text/javascript">
+(function (window) {
+  'use strict'
+
+  const WebComponentElement = window.WebComponentElement
+  const TangoJsElement = window.TangoJsElement
+  const document = window.document
+
+  const DEVNAME = /^([A-Za-z0-9_]+)\/([A-Za-z0-9_]+)\/([A-Za-z0-9_]+)$/
+  const ATTRNAME = /^(.+)\/([A-Za-z0-9_]+)$/
+
+  class TangoJsFormElement extends window.HTMLElement {
+
+    createdCallback () {
+      this.root = this.createShadowRoot()
+      this.dom = this.createLocalDom()
+      this.root.appendChild(this.dom.grid)
+    }
+
+    createLocalDom () {
+      const grid = document.createElement('div')
+      Object.assign(grid.style, {
+        display: 'inline-grid',
+        gridTemplateColumns: '1fr',
+        gridAutoFlow: 'row'
+      })
+      const fields = []
+      return { grid, fields }
+    }
+
+    onModelChange (modelArray) {
+      const elementPromises = modelArray.map(model => {
+        return this.createElementForModel(model)
+      })
+      Promise.all(elementPromises).then(elements => {
+        this.disposeCurrentElements()
+        this.dom.fields = elements
+        this.dom.fields.forEach(node => {
+          this.dom.grid.appendChild(node)
+        })
+      })
+    }
+
+    onPollPeriodChange (pollPeriod) {
+      this.dom.fields.forEach(node => {
+        node.pollPeriod = pollPeriod
+      })
+    }
+
+    disposeCurrentElements () {
+      this.dom.fields.forEach(node => {
+        this.dom.grid.removeChild(node)
+      })
+      this.dom.fields = []
+    }
+
+    createElementForModel (model) {
+      if (this.isDeviceModel(model)) {
+        return this.createElementForDeviceModel(model)
+      } else if (this.isAttributeModel(model)) {
+        return this.createElementForAttributeModel(model)
+      }
+    }
+
+    isDeviceModel (model) {
+      const match = model.match(DEVNAME)
+      return match && match.length === 4
+    }
+
+    isAttributeModel (model) {
+      const [_, devname, name] = model.match(ATTRNAME)
+      return this.isDeviceModel(devname)
+    }
+
+    createElementForDeviceModel (model) {
+      const element = document.createElement('tangojs-state-led')
+      element.model = model
+      element.pollPeriod = this.pollPeriod
+      element.showName = true
+      element.showLed = true
+      return Promise.resolve(element)
+    }
+
+    createElementForAttributeModel (model) {
+      const [_, devname, name] = model.match(ATTRNAME)
+      const proxy = new tangojs.proxy.AttributeProxy(devname, name)
+      return proxy.get_info()
+        .then(attributeInfo => attributeInfo.writable)
+        .then(writable => {
+          switch (writable) {
+            case tangojs.tango.AttrWriteType.READ:
+              return this.createElementForReadOnlyAttributeModel(model)
+            case tangojs.tango.AttrWriteType.READ_WRITE:
+            case tangojs.tango.AttrWriteType.READ_WITH_WRITE:
+              return this.createElementForReadWriteAttributeModel(model)
+          }
+        })
+    }
+
+    createElementForReadOnlyAttributeModel (model) {
+      const element = document.createElement('tangojs-label')
+      element.model = model
+      element.pollPeriod = this.pollPeriod
+      element.showName = true
+      element.showUnit = true
+      element.showQuality = true
+      return element
+    }
+
+    createElementForReadWriteAttributeModel (model) {
+      const element = document.createElement('tangojs-line-edit')
+      element.model = model
+      element.pollPeriod = this.pollPeriod
+      element.showName = true
+      element.showUnit = true
+      element.showQuality = true
+      return element
+    }
+  }
+
+  WebComponentElement.wireAttributes(TangoJsFormElement.prototype, {
+    model: {
+      type: 'array',
+      onChange: TangoJsFormElement.prototype.onModelChange
+    },
+    pollPeriod: {
+      type: 'number',
+      onChange: TangoJsFormElement.prototype.onPollPeriodChange
+    }
+  })
+
+  TangoJsElement.registerComponent(TangoJsFormElement, 'tangojs-form')
+
+})(window)
+
+</script>

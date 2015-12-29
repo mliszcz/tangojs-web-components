@@ -45,7 +45,7 @@ components are created. Example:
   * apply [this patch](https://gist.github.com/d11ea630cc777012d69b.git)
     just before the polyfill is loaded
 * Google Chrome 49+
-  * enable [chrome://flags/#enable-experimental-web-platform-features](
+  * enable [experimental-web-platform-features](
     chrome://flags/#enable-experimental-web-platform-features)
 
 ## Components

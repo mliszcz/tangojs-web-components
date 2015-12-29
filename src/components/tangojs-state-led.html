@@ -82,6 +82,7 @@
     model: {
       type: 'string',
       onChange: function (model) {
+        if (!model) return
         this.onModelChange(model)
         this.updateName()
       }

@@ -38,7 +38,7 @@
     <link rel="import" href="src/components/tangojs-command-button.html">
     <link rel="import" href="src/components/tangojs-state-led.html">
     <link rel="import" href="src/components/tangojs-trend.html">
-    <link rel="import" href="src/components/tangojs-form-element.html">
+    <link rel="import" href="src/components/tangojs-form.html">
 
   </head>
 
@@ -120,11 +120,13 @@
 
       <div>
         <label>tangojs-form</label>
-        <div style="clear: both;"></div>
-        <div style="width: 1050px">
-          <tangojs-form-element-f style="background-color: red;"></tangojs-form-element-f>
-          <tangojs-form-element-t></tangojs-form-element-t>
-        </div>
+        <tangojs-form
+          style="display: inline-block; width: 600px;"
+          model='["tangojs/test/dev1",
+                  "tangojs/test/dev1/sine_trend",
+                  "tangojs/test/dev1/scalar"]'
+          poll-period="1000">
+        </tangojs-form>
       </dvi>
 
     </form>
