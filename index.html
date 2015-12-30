@@ -33,6 +33,7 @@
     </style>
 
     <link rel="import" href="src/components/html-led-element.html">
+    <link rel="import" href="src/components/html-tree-element.html">
     <link rel="import" href="src/components/tangojs-label.html">
     <link rel="import" href="src/components/tangojs-line-edit.html">
     <link rel="import" href="src/components/tangojs-command-button.html">
@@ -127,7 +128,11 @@
                   "tangojs/test/dev1/scalar"]'
           poll-period="1000">
         </tangojs-form>
-      </dvi>
+      </div>
+
+      <div>
+        <label>x-tree</label>
+        <x-tree></x-tree>
 
     </form>
 
@@ -137,6 +142,26 @@
           function commandButtonHandleResult (value) {
             alert(`command: (${this.model})@(${this.parameters}) = ${value}`)
           }
+        window.document.querySelector('x-tree').model = [
+          ['lorem ipsum', [
+            'dolor sit amet',
+            ['consetetur sadipscing', [
+              ['elitr', true],
+              ['sed diam nonumy', { x: 1}]
+            ]],
+            'eirmod tempor',
+            'invidunt ut',
+            'labore et dolore'
+          ]],
+          ['magna aliquyam', [
+            'erat sed',
+            'diam voluptua',
+            'At vero eos'
+          ]]
+        ]
+        window.document.querySelector('x-tree').onselect = function (event) {
+          console.log('tree select', event)
+        }
       })(window)
     </script>
 

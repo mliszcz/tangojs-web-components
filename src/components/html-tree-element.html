@@ -1,0 +1,178 @@
+<!DOCTYPE html>
+
+<script type="text/javascript" src="../web-component-element.js"></script>
+<script type="text/javascript" src="../tangojs-element.js"></script>
+
+<template>
+
+  <style>
+
+  .treeview {
+    margin: 0;
+    padding: 0;
+    overflow: hidden;
+
+    --list-padding: 1.5em;
+  }
+
+  .treeview ul {
+    list-style: none;
+  }
+
+  .treeview input {
+    display: none;
+  }
+
+  .treeview input:checked ~ ul {
+    display: none;
+  }
+
+  .treeview input ~ label {
+    cursor: pointer;
+    font-weight: bold;
+  }
+
+  .treeview ul,
+  .treeview input ~ label {
+    padding-left: var(--list-padding)
+  }
+
+  .treeview input ~ label:before {
+    content: '⊟';
+    width: 0;
+    height: 0;
+    position: absolute;
+    margin-left: calc(-1 * var(--list-padding));
+  }
+
+  .treeview input:checked ~ label:before {
+    content: '⊞'
+  }
+
+  </style>
+
+  <div class="treeview">
+  </div>
+
+</template>
+
+<script type="text/javascript">
+(function (window) {
+  'use strict'
+
+  const WebComponentElement = window.WebComponentElement
+  const document = window.document
+
+  const template = WebComponentElement
+    .getCurrentDocument(window)
+    .querySelector('template')
+
+  class HTMLTreeElement extends window.HTMLElement {
+
+    createdCallback () {
+      const clone = document.importNode(template.content, true)
+      const treeview = clone.querySelector('.treeview')
+      this.dom = { clone, treeview }
+      this.root = this.createShadowRoot()
+      this.root.appendChild(clone)
+    }
+
+    recreateTree (model) {
+      if (this.dom.tree) {
+        this.dom.treeview.removeChild(this.dom.tree)
+      }
+      this.dom.tree = this.createTree(this.buildTreeFromArray(model))
+      this.dom.treeview.appendChild(this.dom.tree)
+
+    }
+
+    buildTreeFromArray (array, path = '') {
+      return array.map(entry => {
+        if (typeof entry === 'string') {
+          return this.createTreeLeaf(entry, {
+            key: entry,
+            value: entry,
+            path: `${path}/${entry}`
+          })
+        }
+        else if (Array.isArray(entry) && entry.length === 2) {
+          const [key, value] = entry
+          if (Array.isArray(value)) {
+            const children = this.buildTreeFromArray(value, `${path}/${key}`)
+            return this.createTreeNode(key, children)
+          } else {
+            return this.createTreeLeaf(key, {
+              key,
+              value,
+              path: `${path}/${key}`
+            })
+          }
+        }
+      })
+    }
+
+    createTree (children = []) {
+      const root = document.createElement('ul')
+      children.forEach(node => {
+        root.appendChild(node)
+      })
+      return root
+    }
+
+    createTreeNode (name, children = []) {
+
+      const node = document.createElement('li')
+      const input = document.createElement('input')
+      const label = document.createElement('label')
+      const span = document.createElement('span')
+      const child = document.createElement('ul')
+
+      node.appendChild(input)
+      node.appendChild(label)
+      node.appendChild(child)
+      label.appendChild(span)
+
+      children.forEach(node => {
+        child.appendChild(node)
+      })
+
+      label.onclick = () => input.checked = ! input.checked
+      input.type = 'checkbox'
+      span.textContent = name
+
+      return node
+    }
+
+    createTreeLeaf (name, data) {
+      const leaf = document.createElement('li')
+      const span = document.createElement('span')
+      span.onclick = () => this.onLeafSelected(data)
+      leaf.appendChild(span)
+      span.textContent = name
+      return leaf
+    }
+
+    onLeafSelected (data) {
+      if (this.onselect && this.onselect.call) {
+        this.onselect.call(this, data)
+      }
+    }
+
+  }
+
+  WebComponentElement.wireAttributes(HTMLTreeElement.prototype, {
+    model: {
+      type: 'object',
+      onChange: HTMLTreeElement.prototype.recreateTree
+    },
+    onselect: {
+      type: ['function', 'event'],
+      attribute: 'onselect'
+    }
+  })
+
+  TangoJsElement.registerComponent(HTMLTreeElement, 'x-tree')
+
+})(window)
+
+</script>
