@@ -8,6 +8,7 @@
   <style>
 
   .treeview {
+    display: flex;
     margin: 0;
     padding: 0;
     overflow: hidden;
@@ -175,13 +176,13 @@
     }
 
     onCheckboxesChange (checkboxes) {
-      this.forEachCheckbox(c => {
+      this.forEachSelector('input.select-button', c => {
         c.style.display = checkboxes ? 'inline' : 'none'
       })
     }
 
-    forEachCheckbox (fn) {
-      const inputs = this.root.querySelectorAll('.select-button')
+    forEachSelector (selector, fn) {
+      const inputs = this.root.querySelectorAll(selector)
       for (let i = 0; i < inputs.length; ++i) {
         fn.call(this, inputs[i])
       }
@@ -214,8 +215,27 @@
 
     clearSelections () {
       this[symbolSelected] = []
-      this.forEachCheckbox(c => {
+      this.forEachSelector('input.select-button', c => {
         c.checked = false
+      })
+    }
+
+    collapseAt (level) {
+      this.expand()
+      const lis = Array.apply(null, {length: level})
+        .map(() => ' li ').join(' ')
+      this.forEachSelector(`.treeview ${lis} input.control-button`, input => {
+        input.checked = true
+      })
+    }
+
+    collapse () {
+      this.collapseAt(1)
+    }
+
+    expand () {
+      this.forEachSelector('input.control-button', input => {
+        input.checked = false
       })
     }
   }

@@ -34,12 +34,14 @@
 
     <link rel="import" href="src/components/html-led-element.html">
     <link rel="import" href="src/components/html-tree-element.html">
+
     <link rel="import" href="src/components/tangojs-label.html">
     <link rel="import" href="src/components/tangojs-line-edit.html">
     <link rel="import" href="src/components/tangojs-command-button.html">
     <link rel="import" href="src/components/tangojs-state-led.html">
     <link rel="import" href="src/components/tangojs-trend.html">
     <link rel="import" href="src/components/tangojs-form.html">
+    <link rel="import" href="src/components/tangojs-device-tree.html">
 
   </head>
 
@@ -133,6 +135,12 @@
       <div>
         <label>x-tree</label>
         <x-tree checkboxes></x-tree>
+      </div>
+
+      <div>
+        <label>tangojs-device-tree</label>
+        <tangojs-device-tree></tangojs-device-tree>
+      </div>
 
     </form>
 
@@ -143,21 +151,11 @@
             alert(`command: (${this.model})@(${this.parameters}) = ${value}`)
           }
         window.document.querySelector('x-tree').model = [
-          ['lorem ipsum', [
-            'dolor sit amet',
-            ['consetetur sadipscing', [
-              ['elitr', true],
-              ['sed diam nonumy', { x: 1}]
-            ]],
-            'eirmod tempor',
-            'invidunt ut',
-            'labore et dolore'
+          ['root1', [
+            ['child11', 'value1'],
+            'child12'
           ]],
-          ['magna aliquyam', [
-            'erat sed',
-            'diam voluptua',
-            'At vero eos'
-          ]]
+          ['root2', []]
         ]
         window.document.querySelector('x-tree').onselect = function (event) {
           console.log('tree select', event)

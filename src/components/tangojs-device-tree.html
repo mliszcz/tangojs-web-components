@@ -1,0 +1,141 @@
+<!DOCTYPE html>
+
+<script type="text/javascript" src="../web-component-element.js"></script>
+<script type="text/javascript" src="../tangojs-element.js"></script>
+<link rel="import" href="html-tree-element.html">
+
+<script type="text/javascript">
+(function (window) {
+  'use strict'
+
+  const WebComponentElement = window.WebComponentElement
+  const tangojs = window.tangojs
+
+  class TangoJsDeviceTreeElement extends window.HTMLElement {
+
+    createLocalDom () {
+
+      const createButton = (text, onClick) => {
+        const button = document.createElement('button')
+        button.innerText = text
+        button.onclick = () => onClick.call(this)
+        return button
+      }
+
+      const tree = document.createElement('x-tree')
+      const controls = document.createElement('div')
+      const grid = document.createElement('div')
+      tree.checkboxes = true
+      Object.assign(grid.style, {
+        display: 'flex',
+        flexDirection: 'column'
+      })
+
+      grid.appendChild(controls)
+      grid.appendChild(tree)
+
+      const buttons = {
+        reset: createButton('☆', () => tree.collapseAt(3)),
+        collapse: createButton('⊞', () => tree.collapse()),
+        expand: createButton('⊟', () => tree.expand()),
+        uncheck: createButton('☐', () => tree.clearSelections())
+      }
+
+      controls.appendChild(buttons.reset)
+      controls.appendChild(buttons.collapse)
+      controls.appendChild(buttons.expand)
+      controls.appendChild(buttons.uncheck)
+
+      return { grid, controls, tree, buttons }
+    }
+
+    createdCallback () {
+      this.root = this.createShadowRoot()
+      this.dom = this.createLocalDom()
+      this.root.appendChild(this.dom.grid)
+      this.database = new tangojs.proxy.Database()
+      this.reloadDeviceTree()
+    }
+
+    reloadDeviceTree () {
+
+      const readAttrAndCmdInfo = (model) => {
+        const proxy = new tangojs.proxy.DeviceProxy(model)
+        return proxy.get_attribute_info().then(attrList => {
+          return proxy.command_list_query().then(cmdList => {
+            return [model, attrList, cmdList]
+          })
+        })
+      }
+
+      this.database.get_device_list('*')
+        .then(devList => {
+          return Promise.all(devList.map(readAttrAndCmdInfo))
+        })
+        .then(attrCmdInfoList => {
+          const attrInfoMap = {}
+          const cmdInfoMap = {}
+          const modelList = attrCmdInfoList.map(([model, attrs, cmds]) =>{
+            attrInfoMap[model] = attrs
+            cmdInfoMap[model] = cmds
+            return model
+          })
+          this.dom.tree.model = this.buildModelTreeFromModelList(modelList,
+                                                                 attrInfoMap,
+                                                                 cmdInfoMap)
+          this.dom.tree.collapseAt(3)
+      }).catch(error => console.log(error))
+    }
+
+    buildModelTreeFromModelList (modelList, attrInfoMap, cmdInfoMap) {
+
+      const groupBy = (array, fn) => {
+        const map =  array.reduce((grouped, element) => {
+          const key = fn(element)
+          if (! grouped.has(key)) {
+            grouped.set(key, [])
+          }
+          grouped.get(key).push(element)
+          return grouped
+        }, new Map())
+        return [...map]
+      }
+
+      const dropHead = ([head, ...tail]) => tail
+
+      const groupByHead = (array) => {
+        return groupBy(array, a => a[0][0])
+          .map( ([key, group]) => {
+            return [key, group.map( ([p, data]) => [dropHead(p), data] )]
+          })
+      }
+
+      // mapping path -> data
+      const initialModel = modelList.map(model => [model.split('/'), model])
+
+      const domains = groupByHead(initialModel).map( ([domain, group]) => {
+        const families = groupByHead(group).map( ([family, group]) => {
+          const members = group.map( ([[member], model]) => {
+            const attrInfoList = attrInfoMap[model]
+            const cmdInfoList = cmdInfoMap[model]
+            return [member, [
+              ['status', model],
+              ['attributes', attrInfoList.map(ai => [ai.name, ai])],
+              ['commands', cmdInfoList.map(ci => [ci.cmd_name, ci])]
+            ]]
+          })
+          return [family, members]
+        })
+        return [domain, families]
+      })
+
+      return domains
+    }
+  }
+
+  TangoJsElement.registerComponent(TangoJsDeviceTreeElement,
+                                   'tangojs-device-tree')
+
+})(window)
+
+</script>
