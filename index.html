@@ -132,7 +132,7 @@
 
       <div>
         <label>x-tree</label>
-        <x-tree></x-tree>
+        <x-tree checkboxes></x-tree>
 
     </form>
 
@@ -161,6 +161,7 @@
         ]
         window.document.querySelector('x-tree').onselect = function (event) {
           console.log('tree select', event)
+          console.log(this.getSelections())
         }
       })(window)
     </script>

@@ -19,25 +19,33 @@
     list-style: none;
   }
 
-  .treeview input {
+  .treeview input.control-button {
     display: none;
   }
 
-  .treeview input:checked ~ ul {
+  .treeview input.control-button:checked ~ ul {
     display: none;
   }
 
-  .treeview input ~ label {
+  .treeview input.control-button ~ label {
     cursor: pointer;
     font-weight: bold;
   }
 
+  .treeview ul li span {
+    cursor: pointer;
+  }
+
+  .treeview ul li span:hover {
+    text-decoration: underline;
+  }
+
   .treeview ul,
-  .treeview input ~ label {
+  .treeview input.control-button ~ label {
     padding-left: var(--list-padding)
   }
 
-  .treeview input ~ label:before {
+  .treeview input.control-button ~ label:before {
     content: '⊟';
     width: 0;
     height: 0;
@@ -45,7 +53,7 @@
     margin-left: calc(-1 * var(--list-padding));
   }
 
-  .treeview input:checked ~ label:before {
+  .treeview input.control-button:checked ~ label:before {
     content: '⊞'
   }
 
@@ -67,6 +75,8 @@
     .getCurrentDocument(window)
     .querySelector('template')
 
+  const symbolSelected = Symbol()
+
   class HTMLTreeElement extends window.HTMLElement {
 
     createdCallback () {
@@ -77,34 +87,35 @@
       this.root.appendChild(clone)
     }
 
-    recreateTree (model) {
+    onModelChange (model) {
       if (this.dom.tree) {
         this.dom.treeview.removeChild(this.dom.tree)
       }
       this.dom.tree = this.createTree(this.buildTreeFromArray(model))
       this.dom.treeview.appendChild(this.dom.tree)
-
+      this[symbolSelected] = []
     }
 
-    buildTreeFromArray (array, path = '') {
+    buildTreeFromArray (array, path = []) {
       return array.map(entry => {
         if (typeof entry === 'string') {
           return this.createTreeLeaf(entry, {
             key: entry,
             value: entry,
-            path: `${path}/${entry}`
+            path: path.concat([entry])
           })
         }
         else if (Array.isArray(entry) && entry.length === 2) {
           const [key, value] = entry
+          const newPath = path.concat([key])
           if (Array.isArray(value)) {
-            const children = this.buildTreeFromArray(value, `${path}/${key}`)
+            const children = this.buildTreeFromArray(value, newPath)
             return this.createTreeNode(key, children)
           } else {
             return this.createTreeLeaf(key, {
               key,
               value,
-              path: `${path}/${key}`
+              path: newPath
             })
           }
         }
@@ -138,36 +149,90 @@
 
       label.onclick = () => input.checked = ! input.checked
       input.type = 'checkbox'
+      input.classList.add('control-button')
       span.textContent = name
 
       return node
     }
 
     createTreeLeaf (name, data) {
+
       const leaf = document.createElement('li')
+      const label = document.createElement('label')
+      const input = document.createElement('input')
       const span = document.createElement('span')
-      span.onclick = () => this.onLeafSelected(data)
-      leaf.appendChild(span)
+
       span.textContent = name
+      input.type = 'checkbox'
+      input.classList.add('select-button')
+      input.onclick = () => this.handleLeafOnClick(data, input.checked)
+
+      label.appendChild(input)
+      label.appendChild(span)
+      leaf.appendChild(label)
+
       return leaf
     }
 
-    onLeafSelected (data) {
+    onCheckboxesChange (checkboxes) {
+      this.forEachCheckbox(c => {
+        c.style.display = checkboxes ? 'inline' : 'none'
+      })
+    }
+
+    forEachCheckbox (fn) {
+      const inputs = this.root.querySelectorAll('.select-button')
+      for (let i = 0; i < inputs.length; ++i) {
+        fn.call(this, inputs[i])
+      }
+    }
+
+    handleLeafOnClick (data, checked) {
+      if (this.checkboxes) {
+        const selected = this[symbolSelected]
+        if (checked) {
+          selected.push(data)
+          this.invokeOnSelectCallback(data)
+        } else {
+          selected.splice(selected.indexOf(data), 1)
+        }
+      } else {
+        this[symbolSelected] = [data]
+        this.invokeOnSelectCallback(data)
+      }
+    }
+
+    invokeOnSelectCallback (data) {
       if (this.onselect && this.onselect.call) {
         this.onselect.call(this, data)
       }
     }
 
+    getSelections () {
+      return this[symbolSelected]
+    }
+
+    clearSelections () {
+      this[symbolSelected] = []
+      this.forEachCheckbox(c => {
+        c.checked = false
+      })
+    }
   }
 
   WebComponentElement.wireAttributes(HTMLTreeElement.prototype, {
     model: {
-      type: 'object',
-      onChange: HTMLTreeElement.prototype.recreateTree
+      type: 'array',
+      value: [],
+      onChange: HTMLTreeElement.prototype.onModelChange
     },
     onselect: {
       type: ['function', 'event'],
       attribute: 'onselect'
+    },
+    checkboxes: {
+      type: 'boolean',
+      onChange: HTMLTreeElement.prototype.onCheckboxesChange
     }
   })
 
