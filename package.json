@@ -8,6 +8,7 @@
     "tango"
   ],
   "scripts": {
+    "start": "npm run server",
     "server": "http-server"
   },
   "homepage": "https://github.com/mliszcz/tangojs-web-components#readme",
@@ -19,11 +20,14 @@
     "url": "https://github.com/mliszcz/tangojs-web-compnents/issues"
   },
   "dependencies": {
-    "tangojs": "../tangojs",
-    "tangojs-connector-local": "../tangojs-connector-local"
+    "tangojs": "^0.2.0",
+    "chart.js": "git+ssh://git@github.com/nnnick/Chart.js#2.0.0-beta1",
+    "moment": "^2.10.6"
   },
   "devDependencies": {
-    "bower": "^1.6.0",
-    "http-server": "^0.8.0"
+    "http-server": "^0.8.0",
+    "webcomponents.js": "^0.7.20",
+    "firefox-html-imports-patch": "git+ssh://git@gist.github.com/d11ea630cc777012d69b.git",
+    "tangojs-connector-local": "^0.2.0"
   }
 }

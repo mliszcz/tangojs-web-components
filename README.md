@@ -7,15 +7,15 @@ offer standard semantics of HTML*Element.
 
 ## Installation
 
-It's available in Bower registry, just get it:
+It's available in npmjs registry, just get it:
 ```
-$ bower install tangojs-web-components
+$ npm install tangojs-web-components
 ```
 
 and drop desired components onto your page:
 ```html
 <link rel="import"
-      href="bower_components/tangojs-web-components/src/components/label.html">
+      href="node_modules/tangojs-web-components/dist/components/label.html">
 ```
 
 ### Configuration
@@ -179,10 +179,24 @@ on top of [Chart.js](http://www.chartjs.org/). You have to include
 dependencies manually:
 
 ```
-<script src="bower_components/moment/min/moment.min.js"></script>
-<script src="bower_components/Chart.js/Chart.js"></script>
+<script src="node_modules/moment/min/moment.min.js"></script>
+<script src="node_modules/chart.js/Chart.min.js"></script>
 ```
 
 ### Form
 
-*TODO*
+Displays widgets for multiple attributes. Widgets are selected according
+to the attribute type.
+
+Example:
+```html
+<tangojs-form
+  model='["tangojs/test/dev1/sine_trend", "tangojs/test/dev1/scalar"]'
+  poll-period="1000">
+</tangojs-form>
+```
+
+Property   | Type     | Attribute   | Remarks
+---------- | -------- | ----------- | -------
+model      | string[] | model       | Array of attribute names.
+pollPeriod | number   | poll-period | Poll period in milliseconds.
