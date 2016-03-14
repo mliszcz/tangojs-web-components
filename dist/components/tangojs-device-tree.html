@@ -14,46 +14,12 @@
 
   class TangoJsDeviceTreeElement extends window.HTMLElement {
 
-    createLocalDom () {
-
-      const createButton = (text, onClick) => {
-        const button = document.createElement('button')
-        button.innerText = text
-        button.onclick = () => onClick.call(this)
-        return button
-      }
-
-      const tree = document.createElement('x-tree')
-      const controls = document.createElement('div')
-      const grid = document.createElement('div')
-      tree.checkboxes = true
-      Object.assign(grid.style, {
-        display: 'flex',
-        flexDirection: 'column'
-      })
-
-      grid.appendChild(controls)
-      grid.appendChild(tree)
-
-      const buttons = {
-        reset: createButton('☆', () => tree.collapseAt(3)),
-        collapse: createButton('⊞', () => tree.collapse()),
-        expand: createButton('⊟', () => tree.expand()),
-        uncheck: createButton('☐', () => tree.clearSelections())
-      }
-
-      controls.appendChild(buttons.reset)
-      controls.appendChild(buttons.collapse)
-      controls.appendChild(buttons.expand)
-      controls.appendChild(buttons.uncheck)
-
-      return { grid, controls, tree, buttons }
-    }
-
     createdCallback () {
       this.root = this.createShadowRoot()
-      this.dom = this.createLocalDom()
-      this.root.appendChild(this.dom.grid)
+      this.dom = {
+        tree: document.createElement('x-tree')
+      }
+      this.root.appendChild(this.dom.tree)
       this.database = new tangojs.proxy.Database()
       this.reloadDeviceTree()
     }
@@ -133,6 +99,21 @@
       return domains
     }
   }
+
+  const HTMLTreeElement = window.tangojsWebComponents.HTMLTreeElement
+
+  ;([
+    'getSelections',
+    'clearSelections',
+    'collapse',
+    'collapseAt',
+    'expand',
+  ]).forEach(fn => {
+    TangoJsDeviceTreeElement.prototype[fn] = function (...args) {
+      return HTMLTreeElement.prototype[fn].apply(this.dom.tree, args)
+    }
+  })
+
 
   TangoJsElement.registerComponent(TangoJsDeviceTreeElement,
                                    'tangojs-device-tree')
