@@ -19,6 +19,7 @@
       this.dom = {
         tree: document.createElement('x-tree')
       }
+      this.dom.tree.checkboxes = true // FIXME still visible when set to false
       this.root.appendChild(this.dom.tree)
       this.database = new tangojs.proxy.Database()
       this.reloadDeviceTree()
