@@ -79,6 +79,23 @@
 
   const symbolSelected = Symbol()
 
+  /**
+   * Event fired when user selects / deselects entry in tree.
+   */
+  class TreeLeafSelectedEvent extends window.CustomEvent {
+
+    /**
+     * @param {Array<Object>} selections
+     * @param {Array<Object>} selectionsAdded
+     * @param {Array<Object>} selectionsRemoved
+     */
+    constructor (selections, selectionsAdded, selectionsRemoved) {
+      super('selected', {
+        detail: { selections, selectionsAdded, selectionsRemoved}
+      })
+    }
+  }
+
   class HTMLTreeElement extends window.HTMLElement {
 
     createdCallback () {
@@ -149,7 +166,9 @@
         child.appendChild(node)
       })
 
-      label.onclick = () => input.checked = ! input.checked
+      label.addEventListener('click', () => {
+        input.checked = ! input.checked
+      })
       input.type = 'checkbox'
       input.classList.add('control-button')
       span.textContent = name
@@ -167,7 +186,9 @@
       span.textContent = name
       input.type = 'checkbox'
       input.classList.add('select-button')
-      input.onclick = () => this.handleLeafOnClick(data, input.checked)
+      input.addEventListener('click', () => {
+        this.handleLeafOnClick(data, input.checked)
+      })
 
       label.appendChild(input)
       label.appendChild(span)
@@ -194,20 +215,26 @@
         const selected = this[symbolSelected]
         if (checked) {
           selected.push(data)
-          this.invokeOnSelectCallback(data)
+          this.invokeOnSelectCallback([data], [])
         } else {
           selected.splice(selected.indexOf(data), 1)
+          this.invokeOnSelectCallback([], [data])
         }
       } else {
         this[symbolSelected] = [data]
-        this.invokeOnSelectCallback(data)
+        this.invokeOnSelectCallback([data], [])
       }
     }
 
-    invokeOnSelectCallback (data) {
-      if (this.onselect && this.onselect.call) {
-        this.onselect.call(this, data)
+    invokeOnSelectCallback (dataAdded, dataRemoved) {
+      // TODO deprecate binding via attribute (use event instead)
+      if (this.onselect && this.onselect.call && dataAdded.length > 0) {
+        this.onselect.call(this, dataAdded[0])
       }
+      this.dispatchEvent(
+        new TreeLeafSelectedEvent(this[symbolSelected],
+                                  dataAdded,
+                                  dataRemoved))
     }
 
     getSelections () {
@@ -215,10 +242,12 @@
     }
 
     clearSelections () {
+      const event = new TreeLeafSelectedEvent([], [], this[symbolSelected])
       this[symbolSelected] = []
       this.forEachSelector('input.select-button', c => {
         c.checked = false
       })
+      this.dispatchEvent(event)
     }
 
     collapseAt (level) {

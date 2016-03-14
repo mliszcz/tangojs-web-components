@@ -161,6 +161,14 @@
           console.log('tree select', event)
           console.log(this.getSelections())
         }
+
+        window.document.querySelector('tangojs-device-tree').addEventListener(
+          'selected',
+          (event) => {
+            console.log('EVENT', event)
+          }
+        )
+
       })(window)
     </script>
 
