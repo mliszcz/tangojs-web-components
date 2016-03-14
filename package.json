@@ -27,7 +27,7 @@
   "devDependencies": {
     "http-server": "^0.8.0",
     "webcomponents.js": "^0.7.20",
-    "firefox-html-imports-patch": "git+ssh://git@gist.github.com/d11ea630cc777012d69b.git",
+    "html-imports-firefox-patch": "github:mliszcz/html-imports-firefox-patch",
     "tangojs-connector-local": "^0.2.0"
   }
 }
