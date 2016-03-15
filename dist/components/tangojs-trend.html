@@ -137,6 +137,9 @@
     model: {
       type: 'array',
       onChange: function (model) {
+        if (!model) {
+          return
+        }
         this.onModelChange(model)
         this.recreateDatasets(model)
       }

@@ -35,6 +35,9 @@
     }
 
     onModelChange (modelArray) {
+      if (!modelArray) {
+        return
+      }
       const elementPromises = modelArray.map(model => {
         return this.createElementForModel(model)
       })
