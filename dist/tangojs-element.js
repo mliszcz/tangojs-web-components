@@ -50,9 +50,8 @@
     })
 
     this.onModelChange = function (model) {
-      this[proxy] = (Array.isArray(model) ? model : [model]).map(m => {
-        return this.createProxy(m)
-      })
+      this[proxy] = (Array.isArray(model) ? model : [model])
+        .reduce((p, m) => (p[m] = this.createProxy(m), p), {})
       this.restartPollingTimer()
     }
 
@@ -68,9 +67,16 @@
 
       this[timer] = setInterval(() => {
 
-        Promise.all(this[proxy].map(p => this.readProxy(p)))
+        const promisedResults = Object
+          .keys(this[proxy])
+          .map(m => this.readProxy(this[proxy][m]).then(x => [m, x]))
+
+        Promise.all(promisedResults)
           .then(results => {
-            this.onModelRead(results)
+            const resultsMap = results.reduce(
+              (acc, [m, x]) => (acc[m] = x, acc),
+              {})
+            this.onModelRead(resultsMap)
           })
           .catch(error => {
             this.onModelError(error)

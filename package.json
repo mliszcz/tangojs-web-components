@@ -21,7 +21,7 @@
   },
   "dependencies": {
     "tangojs": "^0.2.0",
-    "chart.js": "git+ssh://git@github.com/nnnick/Chart.js#2.0.0-beta1",
+    "chart.js": "git+ssh://git@github.com/nnnick/Chart.js#1292558",
     "moment": "^2.10.6"
   },
   "devDependencies": {

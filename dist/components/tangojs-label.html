@@ -45,14 +45,14 @@
     }
 
     updateNameAndUnit () {
-      this.proxy[0].get_info().then(attributeInfo => {
+      this.proxy[this.model].get_info().then(attributeInfo => {
         this.dom.name.textContent = attributeInfo.name
         this.dom.unit.textContent = attributeInfo.display_unit
       })
     }
 
     onModelRead (deviceAttributes) {
-      const attribute = deviceAttributes[0]
+      const attribute = deviceAttributes[this.model]
       this.updateValueAndQuality(attribute.value, attribute.quality)
     }
 

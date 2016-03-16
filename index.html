@@ -10,6 +10,7 @@
 
     <script src="node_modules/moment/min/moment.min.js"></script>
     <script src="node_modules/chart.js/Chart.min.js"></script>
+    <script src="node_modules/chart.js/dist/Chart.min.js"></script>
 
     <script src="node_modules/tangojs/lib/tangojs.js"></script>
     <script src="node_modules/tangojs-connector-local/lib/tangojs-connector-local.js"></script>
@@ -114,7 +115,7 @@
       <div>
         <label>tangojs-trend</label>
         <tangojs-trend
-          style="display: inline-block; width: 600px;"
+          style="display: inline-block; width: 600px; height: 500px"
           model='["tangojs/test/dev1/sine_trend", "tangojs/test/dev1/scalar"]'
           poll-period="1000"
           data-limit="15">

@@ -27,9 +27,17 @@
   const randcf = () => Math.round(prng.nextDouble() * 255)
   const randomColor = () => `rgb(${randcf()},${randcf()},${randcf()})`
 
+  const timeFormat = 'HH:mm:ss'
+
   const plotOptions = {
     responsive: true,
-    maintainAspectRatio: true,
+    maintainAspectRatio: false,
+    title: {
+      display: false
+    },
+    tooltips: {
+      enabled: false
+    },
     animation: {
       duration: 0 // the plot is unreadable with animation
       // easing: 'easeOutBack'
@@ -39,8 +47,12 @@
         type: 'time',
         display: true,
         time: {
-          // format: (date) => moment(new Date(date))
-          unit: 'second'
+          displayFormats: {
+              millisecond: timeFormat,
+              second: timeFormat,
+              minute: timeFormat,
+              hour: timeFormat
+          }
         },
         scaleLabel: {
           display: true,
@@ -60,7 +72,7 @@
     }
   }
 
-  class TangoJsTrendElement extends window.HTMLElement {
+  class TangoJsTrendElement extends window.HTMLDivElement {
 
     createdCallback () {
       this.root = this.createShadowRoot()
@@ -70,9 +82,21 @@
     }
 
     createLocalDom () {
+
       const grid = document.createElement('div')
       const canvas = document.createElement('canvas')
       grid.appendChild(canvas)
+
+      this.style.position = 'relative'
+
+      Object.assign(grid.style, {
+        position: 'absolute',
+        top: 0,
+        bottom: 0,
+        left: 0,
+        right: 0
+      })
+
       return { grid, canvas }
     }
 
@@ -102,10 +126,12 @@
 
       const readDate = (new Date()).getTime()
 
-      this.plot.data.labels = [readDate]
-      deviceAttributes.forEach((devAttr, i) => {
+      this.plot.data.labels.push(readDate)
+      this.trimDataset(this.plot.data.labels)
+
+      Object.keys(deviceAttributes).forEach((model, i) => {
         const dataset = this.plot.data.datasets[i].data
-        dataset.push({ x: readDate, y: devAttr.value })
+        dataset.push({ x: readDate, y: deviceAttributes[model].value })
         this.trimDataset(dataset)
       })
 
@@ -124,6 +150,8 @@
           label: model,
           data: [],
           fill: false,
+          tension: 0.0,
+          metaData: undefined, // Chart.js bug ?
           borderColor: randomColor()
         }
       })

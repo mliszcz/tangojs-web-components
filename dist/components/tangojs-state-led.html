@@ -43,13 +43,13 @@
     }
 
     updateName () {
-      this.proxy[0].get_info().then(deviceInfo => {
+      this.proxy[this.model].get_info().then(deviceInfo => {
         this.dom.name.textContent = deviceInfo.name
       })
     }
 
     onModelRead (states) {
-      const devState = states[0]
+      const devState = states[this.model]
       const [color, on] = this.getLedSetup(devState)
       this.dom.value.textContent = devState.key
       this.dom.led.color = color
