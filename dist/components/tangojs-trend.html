@@ -39,7 +39,7 @@
       enabled: false
     },
     animation: {
-      duration: 0 // the plot is unreadable with animation
+      duration: 1 // the plot is unreadable with animation
       // easing: 'easeOutBack'
     },
     scales: {
@@ -96,6 +96,14 @@
         left: 0,
         right: 0
       })
+
+      Object.assign(canvas.style, {
+        minWidth: '100px',
+        minHeight: '100px'
+      })
+
+      // canvas.height = 400
+      // canvas.width = 300
 
       return { grid, canvas }
     }

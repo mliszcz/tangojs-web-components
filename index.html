@@ -115,7 +115,6 @@
       <div>
         <label>tangojs-trend</label>
         <tangojs-trend
-          style="display: inline-block; width: 600px; height: 500px"
           model='["tangojs/test/dev1/sine_trend", "tangojs/test/dev1/scalar"]'
           poll-period="1000"
           data-limit="15">
@@ -169,6 +168,15 @@
             console.log('EVENT', event)
           }
         )
+
+        setTimeout(() => {
+          const t = document.querySelector('tangojs-trend')
+          Object.assign(t.style, {
+            display: 'inline-block',
+            width: '500px',
+            height: '400px'
+          })
+        }, 2000)
 
       })(window)
     </script>
