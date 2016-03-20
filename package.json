@@ -8,7 +8,7 @@
     "tango"
   ],
   "scripts": {
-    "start": "npm run server",
+    "start": "npm run server -c-1",
     "server": "http-server"
   },
   "homepage": "https://github.com/mliszcz/tangojs-web-components#readme",

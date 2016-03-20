@@ -39,7 +39,7 @@
       enabled: false
     },
     animation: {
-      duration: 1 // the plot is unreadable with animation
+      duration: 0 // the plot is unreadable with animation
       // easing: 'easeOutBack'
     },
     scales: {
@@ -72,13 +72,32 @@
     }
   }
 
-  class TangoJsTrendElement extends window.HTMLDivElement {
+  class TangoJsTrendElement extends window.HTMLElement {
 
     createdCallback () {
+
       this.root = this.createShadowRoot()
       this.dom = this.createLocalDom()
       this.root.appendChild(this.dom.grid)
+
       this.plot = this.createPlot(this.dom.canvas.getContext('2d'))
+
+      this.onResizeCallback = () => {
+        this.plot.chart.resize()
+      }
+
+      this.mutationObserver = new MutationObserver(this.onResizeCallback)
+      this.mutationObserver.observe(this, { attributes: true })
+
+      window.addEventListener('resize', this.onResizeCallback)
+    }
+
+    attachedCallback () {
+      this.onResizeCallback()
+    }
+
+    detachedCallback () {
+      this.mutationObserver.disconnect()
     }
 
     createLocalDom () {
@@ -87,25 +106,18 @@
       const canvas = document.createElement('canvas')
       grid.appendChild(canvas)
 
-      this.style.position = 'relative'
-
       Object.assign(grid.style, {
-        position: 'absolute',
-        top: 0,
-        bottom: 0,
-        left: 0,
-        right: 0
+        height: '100%'
       })
-
-      Object.assign(canvas.style, {
-        minWidth: '100px',
-        minHeight: '100px'
-      })
-
-      // canvas.height = 400
-      // canvas.width = 300
 
       return { grid, canvas }
+    }
+
+    /**
+     * @public
+     */
+    resize() {
+      this.onResizeCallback()
     }
 
     createPlot (context) {
@@ -159,7 +171,7 @@
           data: [],
           fill: false,
           tension: 0.0,
-          metaData: undefined, // Chart.js bug ?
+          // metaData: undefined, // Chart.js bug ?
           borderColor: randomColor()
         }
       })
