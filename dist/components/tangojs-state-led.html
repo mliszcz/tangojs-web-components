@@ -1,15 +1,12 @@
 <!DOCTYPE html>
 <html>
 
-<script type="text/javascript" src="../web-component-element.js"></script>
-<script type="text/javascript" src="../tangojs-element.js"></script>
 <link rel="import" href="html-led-element.html">
 
 <script type="text/javascript">
 (function (window) {
   'use strict'
 
-  const WebComponentElement = window.WebComponentElement
   const tangojs = window.tangojs
 
   class TangoJsStateLedElement extends window.HTMLElement {
@@ -76,33 +73,38 @@
     }
   }
 
-  TangoJsElement.withPolledModel.call(TangoJsStateLedElement.prototype)
-  TangoJsElement.withFormElement.call(TangoJsStateLedElement.prototype)
+  window.tangojs.web.util.mixins.withPolledModel.call(
+    TangoJsStateLedElement.prototype)
+  window.tangojs.web.util.mixins.withFormElement.call(
+    TangoJsStateLedElement.prototype)
 
-  WebComponentElement.wireAttributes(TangoJsStateLedElement.prototype, {
-    model: {
-      type: 'string',
-      onChange: function (model) {
-        if (!model) return
-        this.onModelChange(model)
-        this.updateName()
+  window.tangojs.web.util.WebComponentElement.wireAttributes(
+    TangoJsStateLedElement.prototype,
+    {
+      model: {
+        type: 'string',
+        onChange: function (model) {
+          if (!model) return
+          this.onModelChange(model)
+          this.updateName()
+        }
+      },
+      pollPeriod: {
+        type: 'number',
+        onChange: TangoJsStateLedElement.prototype.onPollPeriodChange
+      },
+      showLed: {
+        type: 'boolean',
+        onChange: TangoJsStateLedElement.prototype.onShowLedChange
+      },
+      showName: {
+        type: 'boolean',
+        onChange: TangoJsStateLedElement.prototype.onShowNameChange
       }
-    },
-    pollPeriod: {
-      type: 'number',
-      onChange: TangoJsStateLedElement.prototype.onPollPeriodChange
-    },
-    showLed: {
-      type: 'boolean',
-      onChange: TangoJsStateLedElement.prototype.onShowLedChange
-    },
-    showName: {
-      type: 'boolean',
-      onChange: TangoJsStateLedElement.prototype.onShowNameChange
-    }
-  })
+    })
 
-  TangoJsElement.registerComponent(TangoJsStateLedElement, 'tangojs-state-led')
+  window.tangojs.web.util.registerComponent('tangojs-state-led',
+                                             TangoJsStateLedElement)
 
 })(window)
 

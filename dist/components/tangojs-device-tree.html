@@ -1,15 +1,12 @@
 <!DOCTYPE html>
 <html>
 
-<script type="text/javascript" src="../web-component-element.js"></script>
-<script type="text/javascript" src="../tangojs-element.js"></script>
 <link rel="import" href="html-tree-element.html">
 
 <script type="text/javascript">
 (function (window) {
   'use strict'
 
-  const WebComponentElement = window.WebComponentElement
   const tangojs = window.tangojs
 
   class TangoJsDeviceTreeElement extends window.HTMLElement {
@@ -101,7 +98,7 @@
     }
   }
 
-  const HTMLTreeElement = window.tangojsWebComponents.HTMLTreeElement
+  const HTMLTreeElement = window.tangojs.web.components.HTMLTreeElement
 
   ;([
     'getSelections',
@@ -115,9 +112,8 @@
     }
   })
 
-
-  TangoJsElement.registerComponent(TangoJsDeviceTreeElement,
-                                   'tangojs-device-tree')
+  window.tangojs.web.util.registerComponent('tangojs-device-tree',
+                                            TangoJsDeviceTreeElement)
 
 })(window)
 

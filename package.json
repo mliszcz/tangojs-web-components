@@ -8,8 +8,9 @@
     "tango"
   ],
   "scripts": {
-    "start": "npm run server -c-1",
-    "server": "http-server"
+    "start": "npm run server",
+    "server": "http-server -c-1",
+    "compile": "rollup --config ./rollup.config.js"
   },
   "homepage": "https://github.com/mliszcz/tangojs-web-components#readme",
   "repository": {
@@ -20,14 +21,15 @@
     "url": "https://github.com/mliszcz/tangojs-web-compnents/issues"
   },
   "dependencies": {
-    "tangojs": "^0.2.0",
+    "tangojs-core": "^0.2.0",
     "chart.js": "git+ssh://git@github.com/nnnick/Chart.js#1292558",
     "moment": "^2.10.6"
   },
   "devDependencies": {
-    "http-server": "^0.8.0",
-    "webcomponents.js": "^0.7.20",
     "html-imports-firefox-patch": "github:mliszcz/html-imports-firefox-patch",
-    "tangojs-connector-local": "^0.2.0"
+    "http-server": "^0.8.0",
+    "rollup": "^0.25.6",
+    "tangojs-connector-local": "^0.2.0",
+    "webcomponents.js": "^0.7.20"
   }
 }

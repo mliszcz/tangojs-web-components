@@ -1,15 +1,12 @@
 <!DOCTYPE html>
 <html>
 
-<script type="text/javascript" src="../web-component-element.js"></script>
-<script type="text/javascript" src="../tangojs-element.js"></script>
-
 <script type="text/javascript">
 (function (window) {
   'use strict'
 
-  const WebComponentElement = window.WebComponentElement
   const document = window.document
+
   const tangojs = window.tangojs
 
   class TangoJsCommandButtonElement extends window.HTMLElement {
@@ -48,22 +45,24 @@
     }
   }
 
-  WebComponentElement.wireAttributes(TangoJsCommandButtonElement.prototype, {
-    model: {
-      type: 'string',
-      onChange: TangoJsCommandButtonElement.prototype.onModelChange
-    },
-    parameters: {
-      type: 'object'
-    },
-    onresult: {
-      type: ['function', 'event'],
-      attribute: 'onresult'
-    }
-  })
+  window.tangojs.web.util.WebComponentElement.wireAttributes(
+    TangoJsCommandButtonElement.prototype,
+    {
+      model: {
+        type: 'string',
+        onChange: TangoJsCommandButtonElement.prototype.onModelChange
+      },
+      parameters: {
+        type: 'object'
+      },
+      onresult: {
+        type: ['function', 'event'],
+        attribute: 'onresult'
+      }
+    })
 
-  TangoJsElement.registerComponent(TangoJsCommandButtonElement,
-                                   'tangojs-command-button')
+  window.tangojs.web.util.registerComponent('tangojs-command-button',
+                                            TangoJsCommandButtonElement)
 
 })(window)
 

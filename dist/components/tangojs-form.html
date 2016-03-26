@@ -1,15 +1,12 @@
 <!DOCTYPE html>
 <html>
 
-<script type="text/javascript" src="../web-component-element.js"></script>
-<script type="text/javascript" src="../tangojs-element.js"></script>
-
 <script type="text/javascript">
 (function (window) {
   'use strict'
 
-  const WebComponentElement = window.WebComponentElement
-  const TangoJsElement = window.TangoJsElement
+  const tangojs = window.tangojs
+
   const document = window.document
 
   const DEVNAME = /^([A-Za-z0-9_]+)\/([A-Za-z0-9_]+)\/([A-Za-z0-9_]+)$/
@@ -127,18 +124,21 @@
     }
   }
 
-  WebComponentElement.wireAttributes(TangoJsFormElement.prototype, {
-    model: {
-      type: 'array',
-      onChange: TangoJsFormElement.prototype.onModelChange
-    },
-    pollPeriod: {
-      type: 'number',
-      onChange: TangoJsFormElement.prototype.onPollPeriodChange
-    }
-  })
+  window.tangojs.web.util.WebComponentElement.wireAttributes(
+    TangoJsFormElement.prototype,
+    {
+      model: {
+        type: 'array',
+        onChange: TangoJsFormElement.prototype.onModelChange
+      },
+      pollPeriod: {
+        type: 'number',
+        onChange: TangoJsFormElement.prototype.onPollPeriodChange
+      }
+    })
 
-  TangoJsElement.registerComponent(TangoJsFormElement, 'tangojs-form')
+  window.tangojs.web.util.registerComponent('tangojs-form',
+                                            TangoJsFormElement)
 
 })(window)
 

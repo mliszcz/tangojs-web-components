@@ -58,6 +58,9 @@ docs/
 .publish/
 .editorconfig
 .eslintrc
+.eslintignore
 .gitignore
 .travis.yml
 gulpfile.js
+
+rollup.config.js

@@ -1,9 +1,6 @@
 <!DOCTYPE html>
 <html>
 
-<script type="text/javascript" src="../web-component-element.js"></script>
-<script type="text/javascript" src="../tangojs-element.js"></script>
-
 <template>
 
   <style>
@@ -37,11 +34,10 @@
 (function (window) {
   'use strict'
 
-  const WebComponentElement = window.WebComponentElement
   const document = window.document
 
-  const template = WebComponentElement
-    .getCurrentDocument(window)
+  const template = window.tangojs.web.util
+    .getCurrentDocument()
     .querySelector('template')
 
   const hexColorRegex = /^#([0-9A-Fa-f]{2})([0-9A-Fa-f]{2})([0-9A-Fa-f]{2})$/
@@ -82,19 +78,21 @@
     }
   }
 
-  WebComponentElement.wireAttributes(HTMLLedElement.prototype, {
-    on: {
-      type: 'boolean',
-      onChange: HTMLLedElement.prototype.toggleLed
-    },
-    color: {
-      type: 'string',
-      value: '#000000',
-      onChange: HTMLLedElement.prototype.updateColorStyle
-    }
-  })
+  window.tangojs.web.util.WebComponentElement.wireAttributes(
+    HTMLLedElement.prototype,
+    {
+      on: {
+        type: 'boolean',
+        onChange: HTMLLedElement.prototype.toggleLed
+      },
+      color: {
+        type: 'string',
+        value: '#000000',
+        onChange: HTMLLedElement.prototype.updateColorStyle
+      }
+    })
 
-  TangoJsElement.registerComponent(HTMLLedElement, 'x-led')
+  window.tangojs.web.util.registerComponent('x-led', HTMLLedElement)
 
 })(window)
 

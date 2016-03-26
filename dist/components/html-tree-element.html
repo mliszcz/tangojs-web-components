@@ -1,9 +1,6 @@
 <!DOCTYPE html>
 <html>
 
-<script type="text/javascript" src="../web-component-element.js"></script>
-<script type="text/javascript" src="../tangojs-element.js"></script>
-
 <template>
 
   <style>
@@ -74,11 +71,10 @@
 (function (window) {
   'use strict'
 
-  const WebComponentElement = window.WebComponentElement
   const document = window.document
 
-  const template = WebComponentElement
-    .getCurrentDocument(window)
+  const template = window.tangojs.web.util
+    .getCurrentDocument()
     .querySelector('template')
 
   const symbolSelected = Symbol()
@@ -274,23 +270,26 @@
     }
   }
 
-  WebComponentElement.wireAttributes(HTMLTreeElement.prototype, {
-    model: {
-      type: 'array',
-      value: [],
-      onChange: HTMLTreeElement.prototype.onModelChange
-    },
-    onselect: {
-      type: ['function', 'event'],
-      attribute: 'onselect'
-    },
-    checkboxes: {
-      type: 'boolean',
-      onChange: HTMLTreeElement.prototype.onCheckboxesChange
-    }
-  })
+  window.tangojs.web.util.WebComponentElement.wireAttributes(
+    HTMLTreeElement.prototype,
+    {
+      model: {
+        type: 'array',
+        value: [],
+        onChange: HTMLTreeElement.prototype.onModelChange
+      },
+      onselect: {
+        type: ['function', 'event'],
+        attribute: 'onselect'
+      },
+      checkboxes: {
+        type: 'boolean',
+        onChange: HTMLTreeElement.prototype.onCheckboxesChange
+      }
+    })
 
-  TangoJsElement.registerComponent(HTMLTreeElement, 'x-tree')
+  window.tangojs.web.util.registerComponent('x-tree',
+                                            HTMLTreeElement)
 
 })(window)
 

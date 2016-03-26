@@ -1,18 +1,15 @@
 <!DOCTYPE html>
 <html>
 
-<script type="text/javascript" src="../web-component-element.js"></script>
-<script type="text/javascript" src="../tangojs-element.js"></script>
 <link rel="import" href="tangojs-label.html">
 
 <script type="text/javascript">
 (function (window) {
   'use strict'
 
-  const WebComponentElement = window.WebComponentElement
   const tangojs = window.tangojs
 
-  const TangoJsLabelElement = window.tangojsWebComponents.TangoJsLabelElement
+  const TangoJsLabelElement = window.tangojs.web.components.TangoJsLabelElement
 
   class TangoJsLineEditElement extends TangoJsLabelElement {
 
@@ -35,7 +32,8 @@
     }
   }
 
-  TangoJsElement.registerComponent(TangoJsLineEditElement, 'tangojs-line-edit')
+  window.tangojs.web.util.registerComponent('tangojs-line-edit',
+                                            TangoJsLineEditElement)
 
 })(window)
 

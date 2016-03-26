@@ -1,15 +1,10 @@
 <!DOCTYPE html>
 <html>
 
-<script type="text/javascript" src="../web-component-element.js"></script>
-<script type="text/javascript" src="../tangojs-element.js"></script>
-
 <script type="text/javascript">
 (function (window) {
   'use strict'
 
-  const WebComponentElement = window.WebComponentElement
-  const TangoJsElement = window.TangoJsElement
   const document = window.document
   const tangojs = window.tangojs
 
@@ -185,29 +180,33 @@
 
   }
 
-  TangoJsElement.withPolledModel.call(TangoJsTrendElement.prototype)
+  window.tangojs.web.util.mixins.withPolledModel.call(
+    TangoJsTrendElement.prototype)
 
-  WebComponentElement.wireAttributes(TangoJsTrendElement.prototype, {
-    model: {
-      type: 'array',
-      onChange: function (model) {
-        if (!model) {
-          return
+  window.tangojs.web.util.WebComponentElement.wireAttributes(
+    TangoJsTrendElement.prototype,
+    {
+      model: {
+        type: 'array',
+        onChange: function (model) {
+          if (!model) {
+            return
+          }
+          this.onModelChange(model)
+          this.recreateDatasets(model)
         }
-        this.onModelChange(model)
-        this.recreateDatasets(model)
+      },
+      pollPeriod: {
+        type: 'number',
+        onChange: TangoJsTrendElement.prototype.onPollPeriodChange
+      },
+      dataLimit: {
+        type: 'number'
       }
-    },
-    pollPeriod: {
-      type: 'number',
-      onChange: TangoJsTrendElement.prototype.onPollPeriodChange
-    },
-    dataLimit: {
-      type: 'number'
-    }
-  })
+    })
 
-  TangoJsElement.registerComponent(TangoJsTrendElement, 'tangojs-trend')
+  window.tangojs.web.util.registerComponent('tangojs-trend',
+                                            TangoJsTrendElement)
 
 })(window)
 

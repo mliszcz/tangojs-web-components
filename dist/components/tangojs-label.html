@@ -1,15 +1,12 @@
 <!DOCTYPE html>
 <html>
 
-<script type="text/javascript" src="../web-component-element.js"></script>
-<script type="text/javascript" src="../tangojs-element.js"></script>
 <link rel="import" href="html-led-element.html">
 
 <script type="text/javascript">
 (function (window) {
   'use strict'
 
-  const WebComponentElement = window.WebComponentElement
   const tangojs = window.tangojs
 
   class TangoJsLabelElement extends window.HTMLElement {
@@ -96,38 +93,43 @@
 
   }
 
-  TangoJsElement.withPolledModel.call(TangoJsLabelElement.prototype)
-  TangoJsElement.withFormElement.call(TangoJsLabelElement.prototype)
+  window.tangojs.web.util.mixins.withPolledModel.call(
+    TangoJsLabelElement.prototype)
+  window.tangojs.web.util.mixins.withFormElement.call(
+    TangoJsLabelElement.prototype)
 
-  WebComponentElement.wireAttributes(TangoJsLabelElement.prototype, {
-    model: {
-      type: 'string',
-      onChange: function (model) {
-        if (!model) return
-        this.onModelChange(model)
-        this.updateNameAndUnit()
+  window.tangojs.web.util.WebComponentElement.wireAttributes(
+    TangoJsLabelElement.prototype,
+    {
+      model: {
+        type: 'string',
+        onChange: function (model) {
+          if (!model) return
+          this.onModelChange(model)
+          this.updateNameAndUnit()
+        }
+      },
+      pollPeriod: {
+        type: 'number',
+        value: 1000,
+        onChange: TangoJsLabelElement.prototype.onPollPeriodChange
+      },
+      showQuality: {
+        type: 'boolean',
+        onChange: TangoJsLabelElement.prototype.onShowQualityChange
+      },
+      showName: {
+        type: 'boolean',
+        onChange: TangoJsLabelElement.prototype.onShowNameChange
+      },
+      showUnit: {
+        type: 'boolean',
+        onChange: TangoJsLabelElement.prototype.onShowUnitChange
       }
-    },
-    pollPeriod: {
-      type: 'number',
-      value: 1000,
-      onChange: TangoJsLabelElement.prototype.onPollPeriodChange
-    },
-    showQuality: {
-      type: 'boolean',
-      onChange: TangoJsLabelElement.prototype.onShowQualityChange
-    },
-    showName: {
-      type: 'boolean',
-      onChange: TangoJsLabelElement.prototype.onShowNameChange
-    },
-    showUnit: {
-      type: 'boolean',
-      onChange: TangoJsLabelElement.prototype.onShowUnitChange
-    }
-  })
+    })
 
-  TangoJsElement.registerComponent(TangoJsLabelElement, 'tangojs-label')
+  window.tangojs.web.util.registerComponent('tangojs-label',
+                                            TangoJsLabelElement)
 
 })(window)
 

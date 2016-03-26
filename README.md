@@ -1,7 +1,7 @@
 # tangojs-web-components
 
 tangojs-web-components is a collection of controls for
-[tangojs](https://github.com/mliszcz/tangojs). The controls are
+[tangojs](https://github.com/mliszcz/tangojs-core). The controls are
 designed to work with any framework (or vanilla JS), and
 offer standard semantics of HTML*Element.
 
@@ -19,7 +19,7 @@ and drop desired components onto your page:
 ```
 
 ### Configuration
-`tangojs-web-components` requires `tangojs` to be configured before any
+`tangojs-web-components` requires `tangojs-core` to be configured before any
 components are created. Example:
 ```html
 <!-- load scripts -->
@@ -37,12 +37,12 @@ components are created. Example:
 ```
 
 ### Requirements
-* Mozilla Firefox 44+  
+* Mozilla Firefox 45+
   * enable [`dom.webcomponents.enabled`](about:config)
-  * enable [`layout.css.grid.enabled`](about:config) (tested on 46.0a1)
+  * enable [`layout.css.grid.enabled`](about:config)
   * use
     [HTMLImports polyfill](http://webcomponents.org/polyfills/html-imports/)
-  * apply [this patch](https://gist.github.com/d11ea630cc777012d69b.git)
+  * apply [this patch](https://github.com/mliszcz/html-imports-firefox-patch)
     just before the polyfill is loaded
 * Google Chrome 49+
   * enable [experimental-web-platform-features](
