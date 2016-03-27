@@ -26,11 +26,12 @@
 
       const readAttrAndCmdInfo = (model) => {
         const proxy = new tangojs.proxy.DeviceProxy(model)
-        return proxy.get_attribute_info().then(attrList => {
-          return proxy.command_list_query().then(cmdList => {
-            return [model, attrList, cmdList]
-          })
-        })
+        return Promise.all([
+          model,
+          proxy.get_info(),
+          proxy.get_attribute_info(),
+          proxy.command_list_query()
+        ])
       }
 
       this.database.get_device_list('*')
@@ -38,21 +39,27 @@
           return Promise.all(devList.map(readAttrAndCmdInfo))
         })
         .then(attrCmdInfoList => {
+          const devInfoMap = {}
           const attrInfoMap = {}
           const cmdInfoMap = {}
-          const modelList = attrCmdInfoList.map(([model, attrs, cmds]) =>{
+          const modelList = attrCmdInfoList.map(([model, dev, attrs, cmds]) => {
+            devInfoMap[model] = dev
             attrInfoMap[model] = attrs
             cmdInfoMap[model] = cmds
             return model
           })
           this.dom.tree.model = this.buildModelTreeFromModelList(modelList,
+                                                                 devInfoMap,
                                                                  attrInfoMap,
                                                                  cmdInfoMap)
           this.dom.tree.collapseAt(3)
       }).catch(error => console.log(error))
     }
 
-    buildModelTreeFromModelList (modelList, attrInfoMap, cmdInfoMap) {
+    buildModelTreeFromModelList (modelList,
+                                 devInfoMap,
+                                 attrInfoMap,
+                                 cmdInfoMap) {
 
       const groupBy = (array, fn) => {
         const map =  array.reduce((grouped, element) => {
@@ -81,12 +88,23 @@
       const domains = groupByHead(initialModel).map( ([domain, group]) => {
         const families = groupByHead(group).map( ([family, group]) => {
           const members = group.map( ([[member], model]) => {
-            const attrInfoList = attrInfoMap[model]
-            const cmdInfoList = cmdInfoMap[model]
             return [member, [
-              ['status', model],
-              ['attributes', attrInfoList.map(ai => [ai.name, ai])],
-              ['commands', cmdInfoList.map(ci => [ci.cmd_name, ci])]
+              ['status', {
+                model: model,
+                info: devInfoMap[model]
+              }],
+              ['attributes', attrInfoMap[model].map(ai =>
+                [ai.name, {
+                  model: `${model}/${ai.name}`,
+                  info: ai
+                }]
+              )],
+              ['commands', cmdInfoMap[model].map(ci =>
+                [ci.cmd_name, {
+                  model: `${model}/{ci.cmd_name}`,
+                  info: ci
+                }]
+              )]
             ]]
           })
           return [family, members]
