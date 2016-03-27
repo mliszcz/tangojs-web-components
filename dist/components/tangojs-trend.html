@@ -206,7 +206,14 @@
     })
 
   window.tangojs.web.util.registerComponent('tangojs-trend',
-                                            TangoJsTrendElement)
+                                            TangoJsTrendElement,
+                                            {
+                                              multipleModels: true,
+                                              attributes: true,
+                                              commands: false,
+                                              status: false,
+                                              readOnly: true
+                                            })
 
 })(window)
 

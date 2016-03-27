@@ -138,7 +138,14 @@
     })
 
   window.tangojs.web.util.registerComponent('tangojs-form',
-                                            TangoJsFormElement)
+                                            TangoJsFormElement,
+                                            {
+                                              multipleModels: true,
+                                              attributes: true,
+                                              commands: true,
+                                              status: true,
+                                              readOnly: true
+                                            })
 
 })(window)
 

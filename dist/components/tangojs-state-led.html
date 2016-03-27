@@ -104,7 +104,14 @@
     })
 
   window.tangojs.web.util.registerComponent('tangojs-state-led',
-                                             TangoJsStateLedElement)
+                                             TangoJsStateLedElement,
+                                             {
+                                               multipleModels: false,
+                                               attributes: false,
+                                               commands: false,
+                                               status: true,
+                                               readOnly: false
+                                             })
 
 })(window)
 

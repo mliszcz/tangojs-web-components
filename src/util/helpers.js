@@ -13,13 +13,13 @@ import { components } from '../tangojs-web-components'
 /**
  * @typedef {Object} ComponentDescriptor
  * @property {string}                tag          tag name
- * @property {ComponentCapabilities} capabilities supported capabilities
+ * @property {ComponentCapabilities} capabilities supported caps.
  */
 
 /**
- * Registers custom element as TangoJS component.
- * @param {string} tagName
- * @param {Object} constructor
+ * Registers custom element as a TangoJS component.
+ * @param {string}                 tagName
+ * @param {Object}                 constructor
  * @param {?ComponentCapabilities} capabilities
  */
 export function registerComponent (tagName, constructor, capabilities = {}) {

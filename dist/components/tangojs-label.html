@@ -129,7 +129,14 @@
     })
 
   window.tangojs.web.util.registerComponent('tangojs-label',
-                                            TangoJsLabelElement)
+                                            TangoJsLabelElement,
+                                            {
+                                              multipleModels: false,
+                                              attributes: true,
+                                              commands: false,
+                                              status: false,
+                                              readOnly: true
+                                            })
 
 })(window)
 

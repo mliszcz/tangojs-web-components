@@ -33,7 +33,14 @@
   }
 
   window.tangojs.web.util.registerComponent('tangojs-line-edit',
-                                            TangoJsLineEditElement)
+                                            TangoJsLineEditElement,
+                                            {
+                                              multipleModels: false,
+                                              attributes: true,
+                                              commands: false,
+                                              status: false,
+                                              readOnly: false
+                                            })
 
 })(window)
 

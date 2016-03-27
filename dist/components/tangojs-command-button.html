@@ -62,7 +62,14 @@
     })
 
   window.tangojs.web.util.registerComponent('tangojs-command-button',
-                                            TangoJsCommandButtonElement)
+                                            TangoJsCommandButtonElement,
+                                            {
+                                              multipleModels: false,
+                                              attributes: false,
+                                              commands: true,
+                                              status: false,
+                                              readOnly: false
+                                            })
 
 })(window)
 
