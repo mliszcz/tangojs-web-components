@@ -45,7 +45,7 @@
     }
   }
 
-  window.tangojs.web.util.WebComponentElement.wireAttributes(
+  window.tangojs.web.util.mixins.withReflectedAttributes.call(
     TangoJsCommandButtonElement.prototype,
     {
       model: {
@@ -53,11 +53,7 @@
         onChange: TangoJsCommandButtonElement.prototype.onModelChange
       },
       parameters: {
-        type: 'object'
-      },
-      onresult: {
-        type: ['function', 'event'],
-        attribute: 'onresult'
+        type: 'string'
       }
     })
 

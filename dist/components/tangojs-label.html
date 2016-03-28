@@ -98,7 +98,7 @@
   window.tangojs.web.util.mixins.withFormElement.call(
     TangoJsLabelElement.prototype)
 
-  window.tangojs.web.util.WebComponentElement.wireAttributes(
+  window.tangojs.web.util.mixins.withReflectedAttributes.call(
     TangoJsLabelElement.prototype,
     {
       model: {
@@ -111,7 +111,7 @@
       },
       pollPeriod: {
         type: 'number',
-        value: 1000,
+        defaultValue: 1000,
         onChange: TangoJsLabelElement.prototype.onPollPeriodChange
       },
       showQuality: {

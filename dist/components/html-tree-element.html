@@ -104,9 +104,13 @@
       this.dom = { clone, treeview }
       this.root = this.createShadowRoot()
       this.root.appendChild(clone)
+      this.onModelChange(this.model)
     }
 
     onModelChange (model) {
+      if (!model) {
+        return
+      }
       if (this.dom.tree) {
         this.dom.treeview.removeChild(this.dom.tree)
       }
@@ -268,22 +272,24 @@
         input.checked = false
       })
     }
+
+    get model () {
+      return this['__model']
+    }
+
+    set model (value) {
+      this['__model'] = value
+      this.onModelChange(value)
+    }
   }
 
-  window.tangojs.web.util.WebComponentElement.wireAttributes(
+  window.tangojs.web.util.mixins.withReflectedAttributes.call(
     HTMLTreeElement.prototype,
     {
-      model: {
-        type: 'array',
-        value: [],
-        onChange: HTMLTreeElement.prototype.onModelChange
-      },
-      onselect: {
-        type: ['function', 'event'],
-        attribute: 'onselect'
-      },
       checkboxes: {
-        type: 'boolean',
+        // type: 'boolean',
+        type: Boolean,
+        defaultValue: true,
         onChange: HTMLTreeElement.prototype.onCheckboxesChange
       }
     })

@@ -116,7 +116,7 @@
         <label>tangojs-trend</label>
         <tangojs-trend
           style="display: inline-block; width: 500px; height: 400px;"
-          model='["tangojs/test/dev1/sine_trend", "tangojs/test/dev1/scalar"]'
+          model="tangojs/test/dev1/sine_trend,tangojs/test/dev1/scalar"
           poll-period="1000"
           data-limit="15">
         </tangojs-trend>
@@ -126,9 +126,7 @@
         <label>tangojs-form</label>
         <tangojs-form
           style="display: inline-block; width: 600px;"
-          model='["tangojs/test/dev1",
-                  "tangojs/test/dev1/sine_trend",
-                  "tangojs/test/dev1/scalar"]'
+          model="tangojs/test/dev1,tangojs/test/dev1/sine_trend,tangojs/test/dev1/scalar"
           poll-period="1000">
         </tangojs-form>
       </div>
@@ -147,10 +145,12 @@
 
     <script type="text/javascript">
       (function (window) {
+
         window.document.querySelector('tangojs-command-button').onresult =
           function commandButtonHandleResult (value) {
             alert(`command: (${this.model})@(${this.parameters}) = ${value}`)
           }
+
         window.document.querySelector('x-tree').model = [
           ['root1', [
             ['child11', 'value1'],
@@ -158,10 +158,6 @@
           ]],
           ['root2', []]
         ]
-        window.document.querySelector('x-tree').onselect = function (event) {
-          console.log('tree select', event)
-          console.log(this.getSelections())
-        }
 
         window.document.querySelector('tangojs-device-tree').addEventListener(
           'selected',

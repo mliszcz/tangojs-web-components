@@ -183,11 +183,11 @@
   window.tangojs.web.util.mixins.withPolledModel.call(
     TangoJsTrendElement.prototype)
 
-  window.tangojs.web.util.WebComponentElement.wireAttributes(
+  window.tangojs.web.util.mixins.withReflectedAttributes.call(
     TangoJsTrendElement.prototype,
     {
       model: {
-        type: 'array',
+        type: [Array, String],
         onChange: function (model) {
           if (!model) {
             return

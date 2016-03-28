@@ -78,13 +78,15 @@
   window.tangojs.web.util.mixins.withFormElement.call(
     TangoJsStateLedElement.prototype)
 
-  window.tangojs.web.util.WebComponentElement.wireAttributes(
+  window.tangojs.web.util.mixins.withReflectedAttributes.call(
     TangoJsStateLedElement.prototype,
     {
       model: {
         type: 'string',
         onChange: function (model) {
-          if (!model) return
+          if (!model) {
+            return
+          }
           this.onModelChange(model)
           this.updateName()
         }

@@ -78,16 +78,17 @@
     }
   }
 
-  window.tangojs.web.util.WebComponentElement.wireAttributes(
+  window.tangojs.web.util.mixins.withReflectedAttributes.call(
     HTMLLedElement.prototype,
     {
       on: {
-        type: 'boolean',
+        type: Boolean,
+        defaultValue: false,
         onChange: HTMLLedElement.prototype.toggleLed
       },
       color: {
-        type: 'string',
-        value: '#000000',
+        type: String,
+        defaultValue: '#000000',
         onChange: HTMLLedElement.prototype.updateColorStyle
       }
     })

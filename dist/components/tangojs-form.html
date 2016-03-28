@@ -124,15 +124,15 @@
     }
   }
 
-  window.tangojs.web.util.WebComponentElement.wireAttributes(
+  window.tangojs.web.util.mixins.withReflectedAttributes.call(
     TangoJsFormElement.prototype,
     {
       model: {
-        type: 'array',
+        type: [Array, String],
         onChange: TangoJsFormElement.prototype.onModelChange
       },
       pollPeriod: {
-        type: 'number',
+        type: Number,
         onChange: TangoJsFormElement.prototype.onPollPeriodChange
       }
     })
