@@ -4,6 +4,7 @@ import withReflectedAttribute from './util/mixins/withReflectedAttribute'
 import withReflectedAttributes from './util/mixins/withReflectedAttributes'
 import { registerComponent, getCurrentDocument } from './util/helpers'
 import * as converters from './util/converters'
+import * as fn from './util/fn'
 
 /**
  * Container for registered components.
@@ -21,6 +22,7 @@ export const util = {
     withReflectedAttribute,
     withReflectedAttributes
   },
+  fn,
   converters,
   registerComponent,
   getCurrentDocument

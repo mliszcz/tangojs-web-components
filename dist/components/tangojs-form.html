@@ -5,12 +5,77 @@
 (function (window) {
   'use strict'
 
-  const tangojs = window.tangojs
-
   const document = window.document
 
-  const DEVNAME = /^([A-Za-z0-9_]+)\/([A-Za-z0-9_]+)\/([A-Za-z0-9_]+)$/
-  const ATTRNAME = /^(.+)\/([A-Za-z0-9_]+)$/
+  const groupBy = window.tangojs.web.util.fn.groupBy
+
+  function groupByDeviceModel (modelArray) {
+    return groupBy(modelArray, model => model.split('/').slice(0, 3).join('/'))
+  }
+
+  function getTagsFromGroupingEntry ([deviceModel, models]) {
+    if (models.length === 1 && models[0].split('/').length === 3) {
+      return Promise.resolve({ [models[0]]: 'tangojs-state-led' })
+    } else {
+      const proxy = new window.tangojs.proxy.DeviceProxy(deviceModel)
+      const attPromise = proxy.get_attribute_info()
+      const cmdPromise = proxy.command_list_query()
+      return Promise.all([attPromise, cmdPromise]).then(([atts, cmds]) => {
+        return models.reduce((tagMap, model) => {
+          const modelParts = model.split('/')
+          if (modelParts.length == 3) {
+            tagMap[model] = 'tangojs-state-led'
+          } else if (modelParts.length == 4) {
+            const name = modelParts.slice(-1)[0]
+            const attributeInfo = atts.find(x => x.name == name)
+            if (attributeInfo) {
+              switch (attributeInfo.writable) {
+                case window.tangojs.tango.AttrWriteType.READ:
+                  tagMap[model] = 'tangojs-label'
+                  break
+                case window.tangojs.tango.AttrWriteType.READ_WRITE:
+                case window.tangojs.tango.AttrWriteType.READ_WITH_WRITE:
+                  tagMap[model] = 'tangojs-line-edit'
+                  break
+              }
+            } else {
+              const commandInfo = cmds.find(x => x.cmd_name == name)
+              if (commandInfo) {
+                tagMap[model] = 'tangojs-command-button'
+              }
+            }
+          }
+          return tagMap
+        }, {})
+      })
+    }
+  }
+
+  function getTagsFromModelList (modelList) {
+    return Promise
+      .all(groupByDeviceModel(modelList).map(getTagsFromGroupingEntry))
+      .then(tagMapList => tagMapList.reduce((tagMap, tagMapForDevice) => {
+        Object.assign(tagMap, tagMapForDevice)
+        return tagMap
+      }, {}))
+  }
+
+  function instantiateComponent (tagName, model) {
+    const constructor = Object
+      .values(window.tangojs.web.components)
+      .find(c => c.descriptor.tag == tagName)
+    if (constructor && constructor.descriptor) {
+      const node = document.createElement(tagName)
+      Object
+        .entries(constructor.descriptor.attributes)
+        .forEach(([propName, { defaultValue }]) => {
+          node[propName] = defaultValue
+        })
+      node.model = model
+      return node
+    }
+    return null
+  }
 
   class TangoJsFormElement extends window.HTMLElement {
 
@@ -35,12 +100,12 @@
       if (!modelArray) {
         return
       }
-      const elementPromises = modelArray.map(model => {
-        return this.createElementForModel(model)
-      })
-      Promise.all(elementPromises).then(elements => {
+
+      getTagsFromModelList(modelArray).then(tagMap => {
         this.disposeCurrentElements()
-        this.dom.fields = elements
+        this.dom.fields = Object
+          .entries(tagMap)
+          .map(([model, tag]) => instantiateComponent(tag, model))
         this.dom.fields.forEach(node => {
           this.dom.grid.appendChild(node)
         })
@@ -58,69 +123,6 @@
         this.dom.grid.removeChild(node)
       })
       this.dom.fields = []
-    }
-
-    createElementForModel (model) {
-      if (this.isDeviceModel(model)) {
-        return this.createElementForDeviceModel(model)
-      } else if (this.isAttributeModel(model)) {
-        return this.createElementForAttributeModel(model)
-      }
-    }
-
-    isDeviceModel (model) {
-      const match = model.match(DEVNAME)
-      return match && match.length === 4
-    }
-
-    isAttributeModel (model) {
-      const [_, devname, name] = model.match(ATTRNAME)
-      return this.isDeviceModel(devname)
-    }
-
-    createElementForDeviceModel (model) {
-      const element = document.createElement('tangojs-state-led')
-      element.model = model
-      element.pollPeriod = this.pollPeriod
-      element.showName = true
-      element.showLed = true
-      return Promise.resolve(element)
-    }
-
-    createElementForAttributeModel (model) {
-      const [_, devname, name] = model.match(ATTRNAME)
-      const proxy = new tangojs.proxy.AttributeProxy(devname, name)
-      return proxy.get_info()
-        .then(attributeInfo => attributeInfo.writable)
-        .then(writable => {
-          switch (writable) {
-            case tangojs.tango.AttrWriteType.READ:
-              return this.createElementForReadOnlyAttributeModel(model)
-            case tangojs.tango.AttrWriteType.READ_WRITE:
-            case tangojs.tango.AttrWriteType.READ_WITH_WRITE:
-              return this.createElementForReadWriteAttributeModel(model)
-          }
-        })
-    }
-
-    createElementForReadOnlyAttributeModel (model) {
-      const element = document.createElement('tangojs-label')
-      element.model = model
-      element.pollPeriod = this.pollPeriod
-      element.showName = true
-      element.showUnit = true
-      element.showQuality = true
-      return element
-    }
-
-    createElementForReadWriteAttributeModel (model) {
-      const element = document.createElement('tangojs-line-edit')
-      element.model = model
-      element.pollPeriod = this.pollPeriod
-      element.showName = true
-      element.showUnit = true
-      element.showQuality = true
-      return element
     }
   }
 

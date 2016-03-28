@@ -61,17 +61,7 @@
                                  attrInfoMap,
                                  cmdInfoMap) {
 
-      const groupBy = (array, fn) => {
-        const map =  array.reduce((grouped, element) => {
-          const key = fn(element)
-          if (! grouped.has(key)) {
-            grouped.set(key, [])
-          }
-          grouped.get(key).push(element)
-          return grouped
-        }, new Map())
-        return [...map]
-      }
+      const groupBy = window.tangojs.web.util.fn.groupBy
 
       const dropHead = ([head, ...tail]) => tail
 
