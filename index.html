@@ -146,10 +146,12 @@
     <script type="text/javascript">
       (function (window) {
 
-        window.document.querySelector('tangojs-command-button').onresult =
-          function commandButtonHandleResult (value) {
-            alert(`command: (${this.model})@(${this.parameters}) = ${value}`)
-          }
+        const cmdBtn = window.document.querySelector('tangojs-command-button')
+
+        cmdBtn.addEventListener('tangojs-command-result', (event) => {
+          const value = event.detail.deviceData.value
+          alert(`command: ${cmdBtn.model}(${cmdBtn.parameters}) = ${value}`)
+        })
 
         window.document.querySelector('x-tree').model = [
           ['root1', [

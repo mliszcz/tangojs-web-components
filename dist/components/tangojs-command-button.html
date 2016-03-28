@@ -9,6 +9,21 @@
 
   const tangojs = window.tangojs
 
+  /**
+   * Event fired when command result arrives.
+   */
+  class CommandButtonResultEvent extends window.CustomEvent {
+
+    /**
+     * @param {DeviceData} deviceData
+     */
+    constructor (deviceData) {
+      super('tangojs-command-result', {
+        detail: { deviceData }
+      })
+    }
+  }
+
   class TangoJsCommandButtonElement extends window.HTMLElement {
 
     createdCallback () {
@@ -35,13 +50,9 @@
 
     onClick (event) {
       const devDataIn = new tangojs.struct.DeviceData(this.parameters)
-      this.proxy.inout(devDataIn)
-        .then(devDataOut => devDataOut.value)
-        .then(value => {
-          if (this.onresult && this.onresult.call) {
-            this.onresult.call(this, value)
-          }
-        })
+      this.proxy.inout(devDataIn).then(devDataOut => {
+        this.dispatchEvent(new CommandButtonResultEvent(devDataOut))
+      })
     }
   }
 
