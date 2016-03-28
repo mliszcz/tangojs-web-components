@@ -198,10 +198,12 @@
       },
       pollPeriod: {
         type: 'number',
+        defaultValue: 1000,
         onChange: TangoJsTrendElement.prototype.onPollPeriodChange
       },
       dataLimit: {
-        type: 'number'
+        type: 'number',
+        defaultValue: 20
       }
     })
 
@@ -213,6 +215,20 @@
                                               commands: false,
                                               status: false,
                                               readOnly: true
+                                            },
+                                            {
+                                              model: {
+                                                type: [Array, String],
+                                                defaultValue: []
+                                              },
+                                              poolPeriod: {
+                                                type: Number,
+                                                defaultValue: 1000
+                                              },
+                                              dataLimit: {
+                                                type: Number,
+                                                defaultValue: 20
+                                              }
                                             })
 
 })(window)

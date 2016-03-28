@@ -133,6 +133,7 @@
       },
       pollPeriod: {
         type: Number,
+        defaultValue: 1000,
         onChange: TangoJsFormElement.prototype.onPollPeriodChange
       }
     })
@@ -145,6 +146,16 @@
                                               commands: true,
                                               status: true,
                                               readOnly: true
+                                            },
+                                            {
+                                              model: {
+                                                type: [Array, String],
+                                                defaultValue: []
+                                              },
+                                              poolPeriod: {
+                                                type: Number,
+                                                defaultValue: 1000
+                                              }
                                             })
 
 })(window)

@@ -93,6 +93,7 @@
       },
       pollPeriod: {
         type: 'number',
+        defaultValue: 1000,
         onChange: TangoJsStateLedElement.prototype.onPollPeriodChange
       },
       showLed: {
@@ -106,14 +107,32 @@
     })
 
   window.tangojs.web.util.registerComponent('tangojs-state-led',
-                                             TangoJsStateLedElement,
-                                             {
-                                               multipleModels: false,
-                                               attributes: false,
-                                               commands: false,
-                                               status: true,
-                                               readOnly: false
-                                             })
+                                            TangoJsStateLedElement,
+                                            {
+                                              multipleModels: false,
+                                              attributes: false,
+                                              commands: false,
+                                              status: true,
+                                              readOnly: false
+                                            },
+                                            {
+                                              model: {
+                                                type: String,
+                                                defaultValue: ''
+                                              },
+                                              poolPeriod: {
+                                                type: Number,
+                                                defaultValue: 1000
+                                              },
+                                              showName: {
+                                                type: Boolean,
+                                                defaultValue: true
+                                              },
+                                               showLed: {
+                                                type: Boolean,
+                                                defaultValue: true
+                                              }
+                                            })
 
 })(window)
 

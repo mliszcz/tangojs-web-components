@@ -21,8 +21,12 @@ import { components } from '../tangojs-web-components'
  * @param {string}                 tagName
  * @param {Object}                 constructor
  * @param {?ComponentCapabilities} capabilities
+ * @param {Object}                 attributes
  */
-export function registerComponent (tagName, constructor, capabilities = {}) {
+export function registerComponent (tagName,
+                                   constructor,
+                                   capabilities = {},
+                                   attributes = {}) {
 
   const registeredConstructor = window.document.registerElement(tagName, {
     prototype: constructor.prototype
@@ -31,7 +35,8 @@ export function registerComponent (tagName, constructor, capabilities = {}) {
   Object.defineProperty(registeredConstructor, 'descriptor', {
     value: {
       tag: tagName,
-      capabilities
+      capabilities,
+      attributes
     }
   })
 
