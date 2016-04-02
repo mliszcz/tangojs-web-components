@@ -41,11 +41,15 @@
       return proxy.read()
     }
 
-    updateNameAndUnit () {
-      this.proxy[this.model].get_info().then(attributeInfo => {
-        this.dom.name.textContent = attributeInfo.name
-        this.dom.unit.textContent = attributeInfo.display_unit
-      })
+    triggerUpdateDueToModelChange () {
+      this.proxy[this.model]
+        .get_info()
+        .then(i => this.updateDueToModelChange(i))
+    }
+
+    updateDueToModelChange (attributeInfo) {
+      this.dom.name.textContent = attributeInfo.name
+      this.dom.unit.textContent = attributeInfo.display_unit
     }
 
     onModelRead (deviceAttributes) {
@@ -106,7 +110,7 @@
         onChange: function (model) {
           if (!model) return
           this.onModelChange(model)
-          this.updateNameAndUnit()
+          this.triggerUpdateDueToModelChange()
         }
       },
       pollPeriod: {

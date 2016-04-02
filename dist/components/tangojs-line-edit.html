@@ -13,23 +13,120 @@
 
   class TangoJsLineEditElement extends TangoJsLabelElement {
 
+    createdCallback () {
+      super.createdCallback()
+      this.writeProxy = null
+    }
+
     createLocalDom () {
       const dom = super.createLocalDom()
       const input = this.createFlexFormField('input', 3, 1)
-      input.element.oninput = (event) => this.onInput(event)
+
+      const dch = (e) => this.delayedChangeHandler(e)
+      input.element.addEventListener('change', dch)
+      input.element.addEventListener('input', dch)
+
+      input.element.disabled = true
       dom.grid.appendChild(input.flex)
       dom.input = input.element
       return dom
     }
 
-    onInput (event) {
+    delayedChangeHandler (event) {
+
+      window.clearTimeout(this.delayedChangeTimer)
+
+      const t = event.target
       const deviceAttribute = new tangojs.struct.DeviceAttribute({
-        value: event.target.value
+        value: (t.type == 'checkbox' ? t.checked : t.value)
       })
-      this.proxy[0]
-        .write(deviceAttribute)
-        .catch(e => console.error(e))
+
+      // FIXME the input[type=number] freezes sometimes when user holds the
+      // mouse on arrow for a few seconds. This is unrelared to timeout below.
+
+      this.delayedChangeTimer = window.setTimeout(() => {
+        if (this.writeProxy) {
+          this.writeProxy
+            .write(deviceAttribute)
+            .catch(e => console.error(e))
+        }
+      }, 1000)
     }
+
+    /**
+     * @override
+     */
+    triggerUpdateDueToModelChange () {
+      this.dom.input.disabled = true
+      super.triggerUpdateDueToModelChange()
+    }
+
+    /**
+     * @override
+     */
+    updateDueToModelChange (attributeInfo) {
+      super.updateDueToModelChange(attributeInfo)
+
+      const { READ, WRITE, READ_WRITE, READ_WITH_WRITE } =
+        window.tangojs.tango.AttrWriteType
+
+      const [_, devname, name] = this.model.match(/^(.+)\/([A-Za-z0-9_]+)$/)
+
+      switch (attributeInfo.writable) {
+        case READ:
+          this.writeProxy = null
+          this.dom.input.disabled = true
+          break
+        case WRITE:
+        case READ_WRITE:
+          this.writeProxy = this.proxy[this.model]
+          this.dom.input.disabled = false
+          break
+        case READ_WITH_WRITE:
+          this.writeProxy = new window.tangojs.proxy.AttributeProxy(
+            devname,
+            attributeInfo.writable_attr_name)
+          this.dom.input.disabled = false
+          break
+      }
+
+      const inputType = this.getInputTypeFromAttributeInfo(attributeInfo)
+
+      if (inputType) {
+        this.dom.input.type = inputType
+      } else {
+        this.dom.input.disabled = true
+      }
+
+      if (attributeInfo.data_format != window.tangojs.tango.AttrDataFormat.SCALAR) {
+        console.warn(`Unsupported data format ${attributeInfo.data_format}.`)
+        this.dom.input.disabled = true
+      }
+    }
+
+    getInputTypeFromAttributeInfo (attributeInfo) {
+      const DT = window.tangojs.tango.AttributeDataType
+
+      switch (attributeInfo.data_type) {
+        case DT.ATT_BOOL: return 'checkbox'
+        case DT.ATT_SHORT:
+        case DT.ATT_LONG:
+        case DT.ATT_LONG64:
+        case DT.ATT_FLOAT:
+        case DT.ATT_DOUBLE:
+        case DT.ATT_UCHAR:
+        case DT.ATT_USHORT:
+        case DT.ATT_ULONG:
+        case DT.ATT_ULONG64: return 'number'
+        case DT.ATT_STRING: return 'text'
+        case DT.ATT_STATE:
+        case DT.DEVICE_STATE:
+        case DT.ATT_ENCODED:
+        case DT.ATT_NO_DATA:
+        default: return undefined
+      }
+    }
+
   }
 
   window.tangojs.web.util.registerComponent('tangojs-line-edit',
