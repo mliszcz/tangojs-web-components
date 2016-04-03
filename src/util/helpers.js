@@ -52,3 +52,18 @@ export function getCurrentDocument () {
   const currentScript = (document._currentScript || document.currentScript)
   return currentScript.ownerDocument
 }
+
+/**
+ * Loads stylesheet from external HTML file.
+ * @param {string} styleModuleId
+ * @param {?string} stylesheetId
+ * @return {HTMLStyleElement}
+ */
+export function importStyleModule (styleModuleId, stylesheetId) {
+  const currentDocument = getCurrentDocument()
+  const styleModule = currentDocument.getElementById(styleModuleId).import
+  const style = stylesheetId
+    ? styleModule.getElementById(stylesheetId)
+    : styleModule.querySelector('style')
+  return currentDocument.importNode(style, true)
+}

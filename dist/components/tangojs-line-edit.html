@@ -11,6 +11,16 @@
 
   const TangoJsLabelElement = window.tangojs.web.components.TangoJsLabelElement
 
+  function createFlexWrappedElement (tag) {
+    // input is broken inside css-grid-layout, requires wrapping
+    const flex = document.createElement('div')
+    const element = document.createElement(tag)
+    flex.style.display = 'flex'
+    element.style.flex = '1'
+    flex.appendChild(element)
+    return { flex, element }
+  }
+
   class TangoJsLineEditElement extends TangoJsLabelElement {
 
     createdCallback () {
@@ -19,15 +29,17 @@
     }
 
     createLocalDom () {
+
       const dom = super.createLocalDom()
-      const input = this.createFlexFormField('input', 3, 1)
+      const input = createFlexWrappedElement('input')
 
       const dch = (e) => this.delayedChangeHandler(e)
       input.element.addEventListener('change', dch)
       input.element.addEventListener('input', dch)
-
       input.element.disabled = true
-      dom.grid.appendChild(input.flex)
+      input.flex.id = 'input'
+
+      dom.root.appendChild(input.flex)
       dom.input = input.element
       return dom
     }

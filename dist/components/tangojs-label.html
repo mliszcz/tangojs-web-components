@@ -3,9 +3,40 @@
 
 <link rel="import" href="html-led-element.html">
 
+<link rel="import" href="assets/tangojs-common-css.html"
+  id="tangojs-common-css">
+
+<template>
+
+  <style>
+    #root {
+      grid-template-columns: 1fr 1fr 1fr 30px 20px;
+    }
+    #name  { grid-column: 1; }
+    #value { grid-column: 2; }
+    #input { grid-column: 3; }
+    #unit  { grid-column: 4; }
+    #led   { grid-column: 5; }
+  </style>
+
+  <div id="root" class="tangojs-form-row">
+    <span id="name"></span>
+    <span id="value"></span>
+    <span id="unit"></span>
+    <x-led id="led"></x-led>
+  </div>
+
+</template>
+
 <script type="text/javascript">
 (function (window) {
   'use strict'
+
+  const currentDocument = window.tangojs.web.util.getCurrentDocument()
+  const template = currentDocument.querySelector('template')
+  const style = window.tangojs.web.util.importStyleModule('tangojs-common-css',
+                                                          'tangojs-form-row')
+  template.content.appendChild(style)
 
   const tangojs = window.tangojs
 
@@ -14,21 +45,21 @@
     createdCallback () {
       this.root = this.createShadowRoot()
       this.dom = this.createLocalDom()
-      this.root.appendChild(this.dom.grid)
+      this.root.appendChild(this.dom.clone)
     }
 
     createLocalDom () {
-      const grid = this.createFormGrid()
+      const clone = document.importNode(template.content, true)
       const dom = {
-        name: this.createFormField('span', 1, 1),
-        value: this.createFormField('span', 2, 1),
+        root: clone.querySelector('#root'),
+        name: clone.querySelector('#name'),
+        value: clone.querySelector('#value'),
         /* 3rd element is used in line-edit */
-        unit: this.createFormField('span', 4, 1),
-        led: this.createFormField('x-led', 5, 1)
+        unit: clone.querySelector('#unit'),
+        led: clone.querySelector('#led')
       }
-      Object.keys(dom).forEach(node => grid.appendChild(dom[node]))
       dom.led.on = true
-      dom.grid = grid
+      dom.clone = clone
       return dom
     }
 
@@ -80,7 +111,7 @@
     }
 
     toggleVisibility (node, show) {
-      node.style.display = show ? 'flex' : 'none'
+      node.style.visibility = show ? 'visible' : 'hidden'
     }
 
     onShowQualityChange (showQuality) {
@@ -98,8 +129,6 @@
   }
 
   window.tangojs.web.util.mixins.withPolledModel.call(
-    TangoJsLabelElement.prototype)
-  window.tangojs.web.util.mixins.withFormElement.call(
     TangoJsLabelElement.prototype)
 
   window.tangojs.web.util.mixins.withReflectedAttributes.call(
