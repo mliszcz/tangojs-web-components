@@ -13,51 +13,64 @@
     return groupBy(modelArray, model => model.split('/').slice(0, 3).join('/'))
   }
 
-  function getTagsFromGroupingEntry ([deviceModel, models]) {
+  /**
+   * Instantiates components for list of models.
+   * @param {[string, Array<string>]}
+   * @return {Promise<Map<string, HTMLElement>>}
+   */
+  function buildComponentsForGroupingEntry ([deviceModel, models]) {
+
     if (models.length === 1 && models[0].split('/').length === 3) {
-      return Promise.resolve({ [models[0]]: 'tangojs-state-led' })
+      // Special case: if there is only one field, it is status. Resolve.
+      return Promise.resolve({
+        [models[0]]: instantiateComponent('tangojs-state-led', models[0])
+      })
     } else {
       const proxy = new window.tangojs.proxy.DeviceProxy(deviceModel)
       const attPromise = proxy.get_attribute_info()
       const cmdPromise = proxy.command_list_query()
       return Promise.all([attPromise, cmdPromise]).then(([atts, cmds]) => {
-        return models.reduce((tagMap, model) => {
-          const modelParts = model.split('/')
-          if (modelParts.length == 3) {
-            tagMap[model] = 'tangojs-state-led'
-          } else if (modelParts.length == 4) {
-            const name = modelParts.slice(-1)[0]
-            const attributeInfo = atts.find(x => x.name == name)
-            if (attributeInfo) {
-              switch (attributeInfo.writable) {
-                case window.tangojs.tango.AttrWriteType.READ:
-                  tagMap[model] = 'tangojs-label'
-                  break
-                case window.tangojs.tango.AttrWriteType.READ_WRITE:
-                case window.tangojs.tango.AttrWriteType.READ_WITH_WRITE:
-                  tagMap[model] = 'tangojs-line-edit'
-                  break
-              }
-            } else {
-              const commandInfo = cmds.find(x => x.cmd_name == name)
-              if (commandInfo) {
-                tagMap[model] = 'tangojs-command-button'
-              }
-            }
-          }
-          return tagMap
-        }, {})
+        return instantiateComponentsList(models, atts, cmds)
       })
     }
   }
 
-  function getTagsFromModelList (modelList) {
-    return Promise
-      .all(groupByDeviceModel(modelList).map(getTagsFromGroupingEntry))
-      .then(tagMapList => tagMapList.reduce((tagMap, tagMapForDevice) => {
-        Object.assign(tagMap, tagMapForDevice)
-        return tagMap
-      }, {}))
+  /**
+   * @param {Array<string>} models
+   * @param {Array<AttributeInfo>} attInfoList
+   * @param {Array<CommandInfo>} cmdInfoList
+   * @return {Promise<Map<string, HTMLElement>>}
+   */
+  function instantiateComponentsList(models, attInfoList, cmdInfoList) {
+    return models.reduce((tagMap, model) => {
+      const modelParts = model.split('/')
+      if (modelParts.length == 3) {
+        tagMap[model] = instantiateComponent('tangojs-state-led', model)
+      } else if (modelParts.length == 4) {
+        const name = modelParts.slice(-1)[0]
+        const attributeInfo = attInfoList.find(x => x.name == name)
+        if (attributeInfo) {
+          switch (attributeInfo.writable) {
+            case window.tangojs.tango.AttrWriteType.READ:
+              tagMap[model] = instantiateComponent('tangojs-label', model)
+              break
+            case window.tangojs.tango.AttrWriteType.READ_WRITE:
+            case window.tangojs.tango.AttrWriteType.READ_WITH_WRITE:
+              tagMap[model] = instantiateComponent('tangojs-line-edit', model)
+              break
+          }
+        } else {
+          const commandInfo = cmdInfoList.find(x => x.cmd_name == name)
+          if (commandInfo) {
+            tagMap[model] = instantiateComponent('tangojs-command-button',
+                                                 model)
+            tagMap[model].appendChild(
+              document.createTextNode(commandInfo.cmd_name))
+          }
+        }
+      }
+      return tagMap
+    }, {})
   }
 
   function instantiateComponent (tagName, model) {
@@ -75,6 +88,15 @@
       return node
     }
     return null
+  }
+
+  function buildComponentsForModelList (modelList) {
+    return Promise
+      .all(groupByDeviceModel(modelList).map(buildComponentsForGroupingEntry))
+      .then(compMapList => compMapList.reduce((compMap, compMapForDevice) => {
+        Object.assign(compMap, compMapForDevice)
+        return compMap
+      }, {}))
   }
 
   class TangoJsFormElement extends window.HTMLElement {
@@ -101,11 +123,9 @@
         return
       }
 
-      getTagsFromModelList(modelArray).then(tagMap => {
+      buildComponentsForModelList(modelArray).then(componentMap => {
         this.disposeCurrentElements()
-        this.dom.fields = Object
-          .entries(tagMap)
-          .map(([model, tag]) => instantiateComponent(tag, model))
+        this.dom.fields = Object.values(componentMap)
         this.dom.fields.forEach(node => {
           this.dom.grid.appendChild(node)
         })
