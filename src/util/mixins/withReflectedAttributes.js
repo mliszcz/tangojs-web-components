@@ -1,9 +1,7 @@
 
 import withReflectedAttribute from './withReflectedAttribute'
 
-const hypenatedForm = s => s.replace(/([a-z])([A-Z])/g, '$1-$2').toLowerCase()
-const camelCasedForm = s => s.replace(/-([a-z])/g, (g) => g[1].toUpperCase())
-
+import { hypenatedForm } from '../helpers'
 /**
  * Applies withReflectedAttribute muliple times.
  * @param {Object} descriptors

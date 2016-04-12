@@ -67,3 +67,11 @@ export function importStyleModule (styleModuleId, stylesheetId) {
     : styleModule.querySelector('style')
   return currentDocument.importNode(style, true)
 }
+
+export function hypenatedForm (s) {
+  return s.replace(/([a-z])([A-Z])/g, '$1-$2').toLowerCase()
+}
+
+export function camelCasedForm (s) {
+  return s.replace(/-([a-z])/g, (g) => g[1].toUpperCase())
+}

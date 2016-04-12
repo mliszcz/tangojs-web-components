@@ -82,6 +82,7 @@
       Object
         .entries(constructor.descriptor.attributes)
         .forEach(([propName, { defaultValue }]) => {
+          // FIXME use setAttribute, not all attributes have reflected property
           node[propName] = defaultValue
         })
       node.model = model
