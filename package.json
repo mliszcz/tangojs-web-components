@@ -12,13 +12,13 @@
     "server": "http-server -c-1",
     "compile": "rollup --config ./rollup.config.js"
   },
-  "homepage": "https://github.com/mliszcz/tangojs-web-components#readme",
+  "homepage": "https://github.com/tangojs/tangojs-web-components#readme",
   "repository": {
     "type": "git",
-    "url": "git+ssh://git@github.com/mliszcz/tangojs-web-compnents.git"
+    "url": "git+ssh://git@github.com/tangojs/tangojs-web-compnents.git"
   },
   "bugs": {
-    "url": "https://github.com/mliszcz/tangojs-web-compnents/issues"
+    "url": "https://github.com/tangojs/tangojs-web-compnents/issues"
   },
   "dependencies": {
     "chart.js": "git+ssh://git@github.com/nnnick/Chart.js#1292558",

@@ -1,7 +1,7 @@
 # tangojs-web-components
 
 tangojs-web-components is a collection of controls for
-[tangojs](https://github.com/mliszcz/tangojs-core). The controls are
+[tangojs](https://github.com/tangojs/tangojs-core). The controls are
 designed to work with any framework (or vanilla JS), and
 offer standard semantics of HTML*Element.
 
@@ -62,13 +62,15 @@ model (e.g. `AttributeInfo` object).
 * [tangojs-plot](#plot)
 * [tangojs-trend](#trend)
 * [tangojs-form](#form)
+* [tangojs-device-tree](#devicetree)
 
 ### Label
 
 Displays value of an read-only attribute. The attribute is polled at
 constant rate.
 
-Example:
+#### Examples
+
 ```html
 <tangojs-label
   model="my/dev/01/attr01"
@@ -77,6 +79,8 @@ Example:
   show-unit>
 </tangojs-label>
 ```
+
+#### Attributes
 
 Property    | Type    | Attribute    | Remarks
 ----------- | ------- | ------------ | -------
@@ -91,10 +95,8 @@ showQuality | boolean | show-quality | Should display quality led.
 Displays value of an writable attribute. The attribute is polled at
 constant rate.
 
-*TODO: handle attribute types, e.g. input[type=number] for numbers,
-toggle / radio-btn for booleans*
+#### Examples
 
-Example:
 ```html
 <tangojs-line-edit
   model="my/dev/01/attr01"
@@ -103,6 +105,8 @@ Example:
   show-unit>
 </tangojs-line-edit>
 ```
+
+#### Attributes
 
 Property    | Type    | Attribute    | Remarks
 ----------- | ------- | ------------ | -------
@@ -116,7 +120,8 @@ showQuality | boolean | show-quality | Should display quality led.
 
 Executes command on the device. Takes arbitrary HTML nodes as children.
 
-Example:
+#### Examples
+
 ```html
 <tangojs-command-button
   model="my/dev/01/cmd01"
@@ -125,17 +130,24 @@ Example:
 </tangojs-command-button>
 ```
 
+#### Attributes
+
 Property   | Type     | Attribute   | Remarks
 ---------- | -------- | ----------- | -------
 model      | string   | model       | Full command name.
 parameters | object   | parameters  | Parameters passed to the command.
-onresult   | function | N/A         | Callback invoked on successful call.
+
+#### Events
+
+* `tangojs-command-result` - fired when command result is available
+  * `event.detail.deviceData: DeviceData` - result
 
 ### Led
 
 Displays device state.
 
-Example:
+#### Examples
+
 ```html
 <tangojs-state-led
   model="my/dev/01"
@@ -144,6 +156,8 @@ Example:
   show-led>
 </tangojs-state-led>
 ```
+
+#### Attributes
 
 Property   | Type    | Attribute   | Remarks
 ---------- | ------- | ----------- | -------
@@ -159,14 +173,18 @@ showLed    | boolean | show-led    | Should display led.
 ### Trend
 
 Plots multiple attributes over time.
-Example:
+
+#### Examples
+
 ```html
 <tangojs-trend
-  model='["tangojs/test/dev1/sine_trend", "tangojs/test/dev1/scalar"]'
+  model="tangojs/test/dev1/sine_trend,tangojs/test/dev1/scalar"
   poll-period="1000"
   data-limit="5">
 </tangojs-trend>
 ```
+
+#### Attributes
 
 Property   | Type     | Attribute   | Remarks
 ---------- | -------- | ----------- | -------
@@ -174,7 +192,9 @@ model      | string[] | model       | Array of attribute names.
 pollPeriod | number   | poll-period | Poll period in milliseconds.
 dataLimit  | number   | data-limit  | Max no. of entries per dataset.
 
-**Note:** `tangojs-trend` widget is built
+#### Remarks
+
+`tangojs-trend` widget is built
 on top of [Chart.js](http://www.chartjs.org/). You have to include
 dependencies manually:
 
@@ -188,15 +208,47 @@ dependencies manually:
 Displays widgets for multiple attributes. Widgets are selected according
 to the attribute type.
 
-Example:
+#### Examples
+
 ```html
 <tangojs-form
-  model='["tangojs/test/dev1/sine_trend", "tangojs/test/dev1/scalar"]'
+  model="tangojs/test/dev1/sine_trend,tangojs/test/dev1/scalar"
   poll-period="1000">
 </tangojs-form>
 ```
+
+#### Attributes
 
 Property   | Type     | Attribute   | Remarks
 ---------- | -------- | ----------- | -------
 model      | string[] | model       | Array of attribute names.
 pollPeriod | number   | poll-period | Poll period in milliseconds.
+
+### DeviceTree
+
+Displays devices, attributes and commands stored in database.
+
+#### Examples
+
+```html
+<tangojs-device-tree></tangojs-device-tree>
+```
+
+#### Attributes
+
+None.
+
+#### Events
+
+* `selected` - fires when element is selected (checked)
+  * `event.detail.selections`
+  * `event.detail.selectionsAdded`
+  * `event.detail.selectionsRemoved`
+
+#### API
+
+* `getSelections(): Array<T>`,
+* `clearSelections(): undefined`,
+* `collapse(): undefined`,
+* `collapseAt(level: Number)`,
+* `expand(): undefined`.
