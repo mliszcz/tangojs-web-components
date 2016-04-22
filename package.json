@@ -10,7 +10,9 @@
   "scripts": {
     "start": "npm run server",
     "server": "http-server -c-1",
-    "compile": "rollup --config ./rollup.config.js"
+    "compile": "rollup --config ./rollup.config.js",
+    "prepublish": "npm run compile",
+    "postversion": "git push && git push --tags"
   },
   "homepage": "https://github.com/tangojs/tangojs-web-components#readme",
   "repository": {
