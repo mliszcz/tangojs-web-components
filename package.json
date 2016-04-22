@@ -23,7 +23,7 @@
     "url": "https://github.com/tangojs/tangojs-web-compnents/issues"
   },
   "dependencies": {
-    "chart.js": "git+ssh://git@github.com/nnnick/Chart.js#1292558",
+    "chart.js": "^2.0.0",
     "moment": "^2.10.6",
     "tangojs-core": "^0.2.0"
   },

@@ -1,7 +1,7 @@
 # tangojs-web-components
 
 tangojs-web-components is a collection of controls for
-[tangojs](https://github.com/tangojs/tangojs-core). The controls are
+[tangojs](https://tangojs.github.io). The controls are
 designed to work with any framework (or vanilla JS), and
 offer standard semantics of HTML*Element.
 
