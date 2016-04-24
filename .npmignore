@@ -63,4 +63,4 @@ docs/
 .travis.yml
 gulpfile.js
 
-rollup.config.js
+.rollup.config.js

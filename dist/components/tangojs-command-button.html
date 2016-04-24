@@ -45,11 +45,11 @@
         return
       }
       const [_, devname, cmdname] = value.match(/^(.+)\/([A-Za-z0-9_]+)$/)
-      this.proxy = new tangojs.proxy.CommandProxy(devname, cmdname)
+      this.proxy = new tangojs.core.api.CommandProxy(devname, cmdname)
     }
 
     onClick (event) {
-      const devDataIn = new tangojs.struct.DeviceData(this.parameters)
+      const devDataIn = new tangojs.core.api.DeviceData(this.parameters)
       this.proxy.inout(devDataIn).then(devDataOut => {
         this.dispatchEvent(new CommandButtonResultEvent(devDataOut))
       })

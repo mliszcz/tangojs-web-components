@@ -10,7 +10,7 @@
   "scripts": {
     "start": "npm run server",
     "server": "http-server -c-1",
-    "compile": "rollup --config ./rollup.config.js",
+    "compile": "rollup --config ./.rollup.config.js",
     "prepublish": "npm run compile",
     "postversion": "git push && git push --tags"
   },
@@ -25,14 +25,14 @@
   "dependencies": {
     "chart.js": "^2.0.0",
     "moment": "^2.10.6",
-    "tangojs-core": "^0.2.0"
+    "tangojs-core": "^0.3.0"
   },
   "devDependencies": {
     "ecma-proposal-object-values-entries": "github:tc39/proposal-object-values-entries",
     "html-imports-firefox-patch": "github:mliszcz/html-imports-firefox-patch",
     "http-server": "^0.8.0",
     "rollup": "^0.25.6",
-    "tangojs-connector-local": "^0.2.0",
+    "tangojs-connector-local": "^0.3.0",
     "webcomponents.js": "^0.7.20"
   }
 }

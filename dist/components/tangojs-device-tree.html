@@ -18,14 +18,14 @@
       }
       this.dom.tree.checkboxes = true // FIXME still visible when set to false
       this.root.appendChild(this.dom.tree)
-      this.database = new tangojs.proxy.Database()
+      this.database = new tangojs.core.api.Database()
       this.reloadDeviceTree()
     }
 
     reloadDeviceTree () {
 
       const readAttrAndCmdInfo = (model) => {
-        const proxy = new tangojs.proxy.DeviceProxy(model)
+        const proxy = new tangojs.core.api.DeviceProxy(model)
         return Promise.all([
           model,
           proxy.get_info(),

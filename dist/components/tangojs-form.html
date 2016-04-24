@@ -26,7 +26,7 @@
         [models[0]]: instantiateComponent('tangojs-state-led', models[0])
       })
     } else {
-      const proxy = new window.tangojs.proxy.DeviceProxy(deviceModel)
+      const proxy = new window.tangojs.core.api.DeviceProxy(deviceModel)
       const attPromise = proxy.get_attribute_info()
       const cmdPromise = proxy.command_list_query()
       return Promise.all([attPromise, cmdPromise]).then(([atts, cmds]) => {
@@ -51,11 +51,11 @@
         const attributeInfo = attInfoList.find(x => x.name == name)
         if (attributeInfo) {
           switch (attributeInfo.writable) {
-            case window.tangojs.tango.AttrWriteType.READ:
+            case window.tangojs.core.tango.AttrWriteType.READ:
               tagMap[model] = instantiateComponent('tangojs-label', model)
               break
-            case window.tangojs.tango.AttrWriteType.READ_WRITE:
-            case window.tangojs.tango.AttrWriteType.READ_WITH_WRITE:
+            case window.tangojs.core.tango.AttrWriteType.READ_WRITE:
+            case window.tangojs.core.tango.AttrWriteType.READ_WITH_WRITE:
               tagMap[model] = instantiateComponent('tangojs-line-edit', model)
               break
           }

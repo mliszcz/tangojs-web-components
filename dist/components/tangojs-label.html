@@ -65,7 +65,7 @@
 
     createProxy (model) {
       const [_, devname, name] = model.match(/^(.+)\/([A-Za-z0-9_]+)$/)
-      return new tangojs.proxy.AttributeProxy(devname, name)
+      return new tangojs.core.api.AttributeProxy(devname, name)
     }
 
     readProxy (proxy) {
@@ -91,7 +91,7 @@
     onModelError (error) {
       console.error(error)
       this.updateValueAndQuality('-error-',
-                                 tangojs.tango.AttrQuality.ATTR_INVALID)
+                                 tangojs.core.tango.AttrQuality.ATTR_INVALID)
     }
 
     updateValueAndQuality (value, quality) {
@@ -101,11 +101,11 @@
 
     getQualityLedColor (quality) {
       switch (quality) {
-        case tangojs.tango.AttrQuality.ATTR_VALID: return '#80FF00'
-        case tangojs.tango.AttrQuality.ATTR_INVALID: return '#880088'
-        case tangojs.tango.AttrQuality.ATTR_ALARM: return '#FF0000'
-        case tangojs.tango.AttrQuality.ATTR_CHANGING: return '#0080FF'
-        case tangojs.tango.AttrQuality.ATTR_WARNING: return '#FFFF00'
+        case tangojs.core.tango.AttrQuality.ATTR_VALID: return '#80FF00'
+        case tangojs.core.tango.AttrQuality.ATTR_INVALID: return '#880088'
+        case tangojs.core.tango.AttrQuality.ATTR_ALARM: return '#FF0000'
+        case tangojs.core.tango.AttrQuality.ATTR_CHANGING: return '#0080FF'
+        case tangojs.core.tango.AttrQuality.ATTR_WARNING: return '#FFFF00'
         default: return '#0000FF'
       }
     }

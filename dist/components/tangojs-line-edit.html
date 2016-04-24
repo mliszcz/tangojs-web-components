@@ -49,7 +49,7 @@
       window.clearTimeout(this.delayedChangeTimer)
 
       const t = event.target
-      const deviceAttribute = new tangojs.struct.DeviceAttribute({
+      const deviceAttribute = new tangojs.core.api.DeviceAttribute({
         value: (t.type == 'checkbox' ? t.checked : t.value)
       })
 
@@ -80,7 +80,7 @@
       super.updateDueToModelChange(attributeInfo)
 
       const { READ, WRITE, READ_WRITE, READ_WITH_WRITE } =
-        window.tangojs.tango.AttrWriteType
+        window.tangojs.core.tango.AttrWriteType
 
       const [_, devname, name] = this.model.match(/^(.+)\/([A-Za-z0-9_]+)$/)
 
@@ -95,7 +95,7 @@
           this.dom.input.disabled = false
           break
         case READ_WITH_WRITE:
-          this.writeProxy = new window.tangojs.proxy.AttributeProxy(
+          this.writeProxy = new window.tangojs.core.api.AttributeProxy(
             devname,
             attributeInfo.writable_attr_name)
           this.dom.input.disabled = false
@@ -110,14 +110,14 @@
         this.dom.input.disabled = true
       }
 
-      if (attributeInfo.data_format != window.tangojs.tango.AttrDataFormat.SCALAR) {
+      if (attributeInfo.data_format != window.tangojs.core.tango.AttrDataFormat.SCALAR) {
         console.warn(`Unsupported data format ${attributeInfo.data_format}.`)
         this.dom.input.disabled = true
       }
     }
 
     getInputTypeFromAttributeInfo (attributeInfo) {
-      const DT = window.tangojs.tango.AttributeDataType
+      const DT = window.tangojs.core.tango.AttributeDataType
 
       switch (attributeInfo.data_type) {
         case DT.ATT_BOOL: return 'checkbox'

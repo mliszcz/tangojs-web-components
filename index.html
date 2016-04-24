@@ -13,17 +13,17 @@
     <script src="node_modules/moment/min/moment.min.js"></script>
     <script src="node_modules/chart.js/dist/Chart.js"></script>
 
-    <script src="node_modules/tangojs-core/lib/tangojs.js"></script>
+    <script src="node_modules/tangojs-core/lib/tangojs-core.js"></script>
     <script src="node_modules/tangojs-connector-local/lib/tangojs-connector-local.js"></script>
-    <script src="node_modules/tangojs-connector-local/lib/tangojs-demo-model.js"></script>
+    <script src="node_modules/tangojs-connector-local/lib/demo-model.js"></script>
     <script src="dist/tangojs-web-components.js"></script>
 
     <script type="text/javascript">
       (function (window) {
         'use strict'
-        const model = window.demoModel.createModel()
-        const conn = new window.tangojsConnectorLocal.LocalConnector(model)
-        window.tangojs.setConnector(conn)
+        const model = window.tangojsLocalDemoModel.createModel()
+        const conn = new window.tangojs.connector.local.LocalConnector(model)
+        window.tangojs.core.setConnector(conn)
       })(window)
     </script>
 

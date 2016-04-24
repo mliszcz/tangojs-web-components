@@ -59,7 +59,7 @@
     }
 
     createProxy (model) {
-      return new tangojs.proxy.DeviceProxy(model)
+      return new tangojs.core.api.DeviceProxy(model)
     }
 
     readProxy (proxy) {
@@ -82,11 +82,11 @@
 
     getLedSetup (devState) {
       switch (devState) {
-        case tangojs.tango.DevState.ON: return ['#80FF00', true]
-        case tangojs.tango.DevState.OFF: return ['#80FF00', false]
-        case tangojs.tango.DevState.RUNNING: return ['#0080FF', true]
-        case tangojs.tango.DevState.FAULT: return ['#FF0000', true]
-        case tangojs.tango.DevState.ALARM: return ['#FF8000', true]
+        case tangojs.core.tango.DevState.ON: return ['#80FF00', true]
+        case tangojs.core.tango.DevState.OFF: return ['#80FF00', false]
+        case tangojs.core.tango.DevState.RUNNING: return ['#0080FF', true]
+        case tangojs.core.tango.DevState.FAULT: return ['#FF0000', true]
+        case tangojs.core.tango.DevState.ALARM: return ['#FF8000', true]
         default: return ['#FF00FF', true]
       }
     }

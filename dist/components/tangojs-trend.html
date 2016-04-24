@@ -136,7 +136,7 @@
 
     createProxy (model) {
       const [_, devname, name] = model.match(/^(.+)\/([A-Za-z0-9_]+)$/)
-      return new tangojs.proxy.AttributeProxy(devname, name)
+      return new tangojs.core.api.AttributeProxy(devname, name)
     }
 
     readProxy (proxy) {
