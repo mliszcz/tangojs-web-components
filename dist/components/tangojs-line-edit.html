@@ -53,22 +53,19 @@
         value: (t.type == 'checkbox' ? t.checked : t.value)
       })
 
-      // FIXME the input[type=number] freezes sometimes when user holds the
-      // mouse on arrow for a few seconds. This is unrelared to timeout below.
-
-      // this.delayedChangeTimer = window.setTimeout(() => {
-      //   if (this.writeProxy) {
-      //     this.writeProxy
-      //       .write(deviceAttribute)
-      //       .catch(e => console.error(e))
-      //   }
-      // }, 1000)
-
       if (this.writeProxy) {
         this.writeProxy
           .write(deviceAttribute)
           .catch(e => console.error(e))
       }
+    }
+
+    /**
+     * @override
+     */
+    updateValueAndQuality (value, quality) {
+      super.updateValueAndQuality(value, quality)
+      this.dom.input.value = value
     }
 
     /**
