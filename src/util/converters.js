@@ -27,7 +27,7 @@ const arrayParse = (x, elemParse) => x.split(',').map(e => elemParse(e.trim()))
 const arrayStringify = (x, elemStringify) => x.map(elemStringify).join(',')
 
 const booleanParse = x => x !== null
-const booleanStringify = x => ''
+const booleanStringify = () => ''
 
 const normalizeType = type => {
   if (Array.isArray(type)) {

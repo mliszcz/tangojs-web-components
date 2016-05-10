@@ -21,11 +21,11 @@ export default function () {
   const proxy = Symbol.for('proxy')
 
   if (!this.createProxy) {
-    console.warn(`Mixing prototype lacks 'createProxy' method.`)
+    console.warn('Mixing prototype lacks \'createProxy\' method.')
   }
 
   if (!this.readProxy) {
-    console.warn(`Mixing prototype lacks 'readProxy' method.`)
+    console.warn('Mixing prototype lacks \'readProxy\' method.')
   }
 
   if (!this.onModelRead) {
@@ -49,15 +49,13 @@ export default function () {
     this.restartPollingTimer()
   }
 
-  this.onPollPeriodChange = function (pollPeriod) {
+  this.onPollPeriodChange = function () {
     this.restartPollingTimer()
   }
 
   this.restartPollingTimer = function () {
 
-    if (this[timer]) {
-      clearInterval(this[timer])
-    }
+    clearInterval(this[timer])
 
     this[timer] = setInterval(() => {
 
