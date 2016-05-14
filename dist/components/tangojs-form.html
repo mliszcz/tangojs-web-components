@@ -22,9 +22,9 @@
 
     if (models.length === 1 && models[0].split('/').length === 3) {
       // Special case: if there is only one field, it is status. Resolve.
-      return Promise.resolve({
-        [models[0]]: instantiateComponent('tangojs-state-led', models[0])
-      })
+      const node = instantiateStateLed()
+      node.model = models[0]
+      return Promise.resolve({ [models[0]]: node })
     } else {
       const proxy = new window.tangojs.core.api.DeviceProxy(deviceModel)
       const attPromise = proxy.get_attribute_info()
@@ -45,50 +45,60 @@
     return models.reduce((tagMap, model) => {
       const modelParts = model.split('/')
       if (modelParts.length == 3) {
-        tagMap[model] = instantiateComponent('tangojs-state-led', model)
+        tagMap[model] = instantiateStateLed()
       } else if (modelParts.length == 4) {
         const name = modelParts.slice(-1)[0]
         const attributeInfo = attInfoList.find(x => x.name == name)
         if (attributeInfo) {
           switch (attributeInfo.writable) {
             case window.tangojs.core.tango.AttrWriteType.READ:
-              tagMap[model] = instantiateComponent('tangojs-label', model)
+              tagMap[model] = instantiateLabel()
               break
             case window.tangojs.core.tango.AttrWriteType.READ_WRITE:
             case window.tangojs.core.tango.AttrWriteType.READ_WITH_WRITE:
-              tagMap[model] = instantiateComponent('tangojs-line-edit', model)
+              tagMap[model] = instantiateLineEdit()
               break
           }
         } else {
           const commandInfo = cmdInfoList.find(x => x.cmd_name == name)
           if (commandInfo) {
-            tagMap[model] = instantiateComponent('tangojs-command-button',
-                                                 model)
+            tagMap[model] = instantiateCommandButton()
             tagMap[model].appendChild(
               document.createTextNode(commandInfo.cmd_name))
           }
         }
       }
+      tagMap[model].model = model
       return tagMap
     }, {})
   }
 
-  function instantiateComponent (tagName, model) {
-    const constructor = Object
-      .values(window.tangojs.web.components)
-      .find(c => c.descriptor.tag == tagName)
-    if (constructor && constructor.descriptor) {
-      const node = document.createElement(tagName)
-      Object
-        .entries(constructor.descriptor.attributes)
-        .forEach(([propName, { defaultValue }]) => {
-          // FIXME use setAttribute, not all attributes have reflected property
-          node[propName] = defaultValue
-        })
-      node.model = model
-      return node
-    }
-    return null
+  function instantiateStateLed () {
+    const node = document.createElement('tangojs-state-led')
+    node.showName = true
+    node.showLed = true
+    return node
+  }
+
+  function instantiateLabel () {
+    const node = document.createElement('tangojs-label')
+    node.showQuality = true
+    node.showName = true
+    node.showUnit = true
+    return node
+  }
+
+  function instantiateLineEdit () {
+    const node = document.createElement('tangojs-line-edit')
+    node.showQuality = true
+    node.showName = true
+    node.showUnit = true
+    return node
+  }
+
+  function instantiateCommandButton () {
+    const node = document.createElement('tangojs-command-button')
+    return node
   }
 
   function buildComponentsForModelList (modelList) {
@@ -161,25 +171,21 @@
       }
     })
 
-  window.tangojs.web.util.registerComponent('tangojs-form',
-                                            TangoJsFormElement,
-                                            {
-                                              multipleModels: true,
-                                              attributes: true,
-                                              commands: true,
-                                              status: true,
-                                              readOnly: true
-                                            },
-                                            {
-                                              model: {
-                                                type: [Array, String],
-                                                defaultValue: []
-                                              },
-                                              poolPeriod: {
-                                                type: Number,
-                                                defaultValue: 1000
-                                              }
-                                            })
+  window.tangojs.web.util.registerComponent(
+    'tangojs-form',
+    TangoJsFormElement,
+    {
+      capabilities: {
+        attributeModel: true,
+        commandModel: true,
+        statusModel: true,
+        readOnlyModel: true
+      },
+      attributes: {
+        'model': { type: [Array, String] },
+        'pool-period': { type: Number }
+      }
+    })
 
 })(window)
 

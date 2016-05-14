@@ -131,33 +131,23 @@
       }
     })
 
-  window.tangojs.web.util.registerComponent('tangojs-state-led',
-                                            TangoJsStateLedElement,
-                                            {
-                                              multipleModels: false,
-                                              attributes: false,
-                                              commands: false,
-                                              status: true,
-                                              readOnly: false
-                                            },
-                                            {
-                                              model: {
-                                                type: String,
-                                                defaultValue: ''
-                                              },
-                                              poolPeriod: {
-                                                type: Number,
-                                                defaultValue: 1000
-                                              },
-                                              showName: {
-                                                type: Boolean,
-                                                defaultValue: true
-                                              },
-                                               showLed: {
-                                                type: Boolean,
-                                                defaultValue: true
-                                              }
-                                            })
+  window.tangojs.web.util.registerComponent(
+    'tangojs-state-led',
+    TangoJsStateLedElement,
+    {
+      capabilities: {
+        attributeModel: false,
+        commandModel: false,
+        statusModel: true,
+        readOnlyModel: false
+      },
+      attributes: {
+        'model': { type: String },
+        'pool-period': { type: Number },
+        'show-name': { type: Boolean },
+        'show-led': { type: Boolean }
+      }
+    })
 
 })(window)
 

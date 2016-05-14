@@ -147,15 +147,17 @@
   window.tangojs.web.util.mixins.withPolledModel.call(
     TangoJsLabelElement.prototype)
 
+    // TODO rename to withReflectedProperties
   window.tangojs.web.util.mixins.withReflectedAttributes.call(
     TangoJsLabelElement.prototype,
     {
       model: {
         type: 'string',
         onChange: function (model) {
-          if (!model) return
-          this.onModelChange(model)
-          this.triggerUpdateDueToModelChange()
+          if (model) {
+            this.onModelChange(model)
+            this.triggerUpdateDueToModelChange()
+          }
         }
       },
       pollPeriod: {
@@ -177,37 +179,24 @@
       }
     })
 
-  window.tangojs.web.util.registerComponent('tangojs-label',
-                                            TangoJsLabelElement,
-                                            {
-                                              multipleModels: false,
-                                              attributes: true,
-                                              commands: false,
-                                              status: false,
-                                              readOnly: true
-                                            },
-                                            {
-                                              model: {
-                                                type: String,
-                                                defaultValue: ''
-                                              },
-                                              poolPeriod: {
-                                                type: Number,
-                                                defaultValue: 1000
-                                              },
-                                              showQuality: {
-                                                type: Boolean,
-                                                defaultValue: true
-                                              },
-                                              showName: {
-                                                type: Boolean,
-                                                defaultValue: true
-                                              },
-                                              showUnit: {
-                                                type: Boolean,
-                                                defaultValue: true
-                                              }
-                                            })
+  window.tangojs.web.util.registerComponent(
+    'tangojs-label',
+    TangoJsLabelElement,
+    {
+      capabilities: {
+        attributeModel: true,
+        commandModel: false,
+        statusModel: false,
+        readOnlyModel: true
+      },
+      attributes: {
+        'model': { type: String },
+        'pool-period': { type: Number },
+        'show-quality': { type: Boolean },
+        'show-name': { type: Boolean },
+        'show-unit': { type: Boolean }
+      }
+    })
 
 })(window)
 

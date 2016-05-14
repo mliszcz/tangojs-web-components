@@ -207,29 +207,22 @@
       }
     })
 
-  window.tangojs.web.util.registerComponent('tangojs-trend',
-                                            TangoJsTrendElement,
-                                            {
-                                              multipleModels: true,
-                                              attributes: true,
-                                              commands: false,
-                                              status: false,
-                                              readOnly: true
-                                            },
-                                            {
-                                              model: {
-                                                type: [Array, String],
-                                                defaultValue: []
-                                              },
-                                              poolPeriod: {
-                                                type: Number,
-                                                defaultValue: 1000
-                                              },
-                                              dataLimit: {
-                                                type: Number,
-                                                defaultValue: 20
-                                              }
-                                            })
+  window.tangojs.web.util.registerComponent(
+    'tangojs-trend',
+    TangoJsTrendElement,
+    {
+      capabilities: {
+        attributeModel: true,
+        commandModel: false,
+        statusModel: false,
+        readOnlyModel: false
+      },
+      attributes: {
+        'model': { type: [Array, String] },
+        'pool-period': { type: Number },
+        'data-limit': { type: Number }
+      }
+    })
 
 })(window)
 

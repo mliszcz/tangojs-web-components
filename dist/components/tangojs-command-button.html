@@ -49,7 +49,8 @@
     }
 
     onClick (event) {
-      const devDataIn = new tangojs.core.api.DeviceData(this.parameters)
+      // TODO convert arguments to in-type
+      const devDataIn = new tangojs.core.api.DeviceData(this.arguments)
       this.proxy.inout(devDataIn).then(devDataOut => {
         this.dispatchEvent(new CommandButtonResultEvent(devDataOut))
       })
@@ -63,30 +64,27 @@
         type: 'string',
         onChange: TangoJsCommandButtonElement.prototype.onModelChange
       },
-      parameters: {
+      arguments: {
         type: 'string'
       }
     })
 
-  window.tangojs.web.util.registerComponent('tangojs-command-button',
-                                            TangoJsCommandButtonElement,
-                                            {
-                                              multipleModels: false,
-                                              attributes: false,
-                                              commands: true,
-                                              status: false,
-                                              readOnly: false
-                                            },
-                                            {
-                                              model: {
-                                                type: String,
-                                                defaultValue: ''
-                                              },
-                                              parameters: {
-                                                type: String,
-                                                defaultValue: ''
-                                              }
-                                            })
+window.tangojs.web.util.registerComponent(
+  'tangojs-command-button',
+  TangoJsCommandButtonElement,
+  {
+    capabilities: {
+      attributeModel: false,
+      commandModel: true,
+      statusModel: false,
+      readOnlyModel: false
+    },
+    attributes: {
+      'model': { type: String },
+      'arguments': { type: String }
+    }
+  })
+
 
 })(window)
 

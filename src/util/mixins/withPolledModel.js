@@ -50,7 +50,9 @@ export default function () {
   }
 
   this.onPollPeriodChange = function () {
-    this.restartPollingTimer()
+    if (this[proxy]) {
+      this.restartPollingTimer()
+    }
   }
 
   this.restartPollingTimer = function () {
@@ -58,7 +60,6 @@ export default function () {
     clearInterval(this[timer])
 
     this[timer] = setInterval(() => {
-
       const promisedResults = Object
         .keys(this[proxy])
         .map(m => this.readProxy(this[proxy][m]).then(x => [m, x]))

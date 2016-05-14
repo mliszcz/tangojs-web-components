@@ -3,44 +3,49 @@ import { components } from '../tangojs-web-components'
 
 /**
  * @typedef {Object} ComponentCapabilities
- * @property {boolean} multipleModels supports multiple models?
- * @property {boolean} attributes     supports attributes?
- * @property {boolean} commands       supports commands?
- * @property {boolean} status         supports status-fields?
- * @property {boolean} readOnly       supports read-only attributes?
+ * @property {boolean} attributeModel
+ * @property {boolean} commandModel
+ * @property {boolean} statusModel
+ * @property {boolean} readOnlyModel
+ */
+
+/**
+ * @typedef {Object} ComponentAttribute
+ * @property {Function} type
  */
 
 /**
  * @typedef {Object} ComponentDescriptor
- * @property {string}                tag          tag name
- * @property {ComponentCapabilities} capabilities supported caps.
+ * @property {string}                          tagName
+ * @property {ComponentCapabilities}           capabilities
+ * @property {Map<string, ComponentAttribute>} attributes
+ *
+ * The purpose of descriptor is to allow for automatic component discovery
+ * by external tools.
  */
 
 /**
  * Registers custom element as a TangoJS component.
  * @param {string}                 tagName
- * @param {Object}                 constructor
- * @param {?ComponentCapabilities} capabilities
- * @param {Object}                 attributes
+ * @param {Function}               constructor
+ * @param {?ComponentDescriptor}   descriptor
+ * @return {Function}
  */
 export function registerComponent (tagName,
                                    constructor,
-                                   capabilities = {},
-                                   attributes = {}) {
+                                   descriptor) {
 
   const registeredConstructor = window.document.registerElement(tagName, {
     prototype: constructor.prototype
   })
 
   Object.defineProperty(registeredConstructor, 'descriptor', {
-    value: {
-      tag: tagName,
-      capabilities,
-      attributes
-    }
+    value: descriptor ? Object.assign({}, descriptor, { tagName }) : undefined
   })
 
   components[constructor.name] = registeredConstructor
+
+  return registeredConstructor
 }
 
 /**
