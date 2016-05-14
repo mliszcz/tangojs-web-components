@@ -42,26 +42,11 @@
 
   class TangoJsLabelElement extends window.HTMLElement {
 
-    // FIXME This method has been moved here from tangojs-line-edit.html
-    // as a workaround for tangojs/issues#25 (browser freezes on input).
-    // The issue was related to the interworking between Shadow DOM and
-    // HTML imports - input added by subclass was originated from another
-    // document instance (guess).
-
-    // createFlexWrappedElement (tag) {
-    //   // input is broken inside css-grid-layout, requires wrapping
-    //   const flex = document.createElement('div')
-    //   const element = document.createElement(tag)
-    //   flex.style.display = 'flex'
-    //   element.style.flex = '1'
-    //   flex.appendChild(element)
-    //   return { flex, element }
-    // }
-
     createdCallback () {
-      this.root = this.createShadowRoot()
+      // this.root = this.createShadowRoot() // FIXME tangojs/issues#25
       this.dom = this.createLocalDom()
-      this.root.appendChild(this.dom.clone)
+      // this.root.appendChild(this.dom.clone) // FIXME tangojs/issues#25
+      this.appendChild(this.dom.clone)
     }
 
     createLocalDom () {
