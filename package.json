@@ -1,6 +1,6 @@
 {
   "name": "tangojs-web-components",
-  "version": "0.4.1",
+  "version": "0.4.2",
   "description": "Widgets collection for TangoJS.",
   "author": "mliszcz <liszcz.michal@gmail.com>",
   "license": "MIT",
