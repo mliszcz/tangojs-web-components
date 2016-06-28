@@ -44,9 +44,13 @@ export default function () {
   })
 
   this.onModelChange = function (model) {
-    this[proxy] = (Array.isArray(model) ? model : [model])
-      .reduce((p, m) => (p[m] = this.createProxy(m), p), {})
-    this.restartPollingTimer()
+    if (model) {
+      this[proxy] = (Array.isArray(model) ? model : [model])
+        .reduce((p, m) => (p[m] = this.createProxy(m), p), {})
+      this.restartPollingTimer()
+    } else {
+      this.stopPollingTimer()
+    }
   }
 
   this.onPollPeriodChange = function () {
@@ -57,7 +61,7 @@ export default function () {
 
   this.restartPollingTimer = function () {
 
-    clearInterval(this[timer])
+    this.stopPollingTimer()
 
     this[timer] = setInterval(() => {
       const promisedResults = Object
@@ -75,6 +79,10 @@ export default function () {
           this.onModelError(error)
         })
     }, this.pollPeriod) // FIXME: poolPeriod may be stored in mixin closure.
+  }
+
+  this.stopPollingTimer = function () {
+    clearInterval(this[timer])
   }
 
 }
