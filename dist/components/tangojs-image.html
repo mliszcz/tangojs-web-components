@@ -1,0 +1,196 @@
+<!DOCTYPE html>
+<html>
+
+<script type="text/javascript">
+(function (window) {
+  'use strict'
+
+  const document = window.document
+  const tangojs = window.tangojs
+
+  
+  class TangoJsImageElement extends window.HTMLElement {
+
+    createdCallback () {
+      console.log('createdCallback')
+
+      this.root = this.createShadowRoot()
+      this.dom = this.createLocalDom()
+      this.root.appendChild(this.dom.grid)
+
+      //TODO instancier composant ici
+      this.viewer = this.createViewer(this.dom.grid)
+
+      this.onResizeCallback = () => {
+
+      }
+
+      this.mutationObserver = new MutationObserver(this.onResizeCallback)
+      this.mutationObserver.observe(this, { attributes: true })
+
+      window.addEventListener('resize', this.onResizeCallback)
+    }
+
+    attachedCallback () {
+      this.onResizeCallback()
+    }
+
+
+    createLocalDom () {
+
+      const grid = document.createElement('div')
+      const canvas = document.createElement('canvas')
+      grid.appendChild(canvas)
+
+      Object.assign(this.style, {
+        display: 'flex',
+        flexDirection: 'column'
+      })
+
+      Object.assign(grid.style, {
+        flex: 1,
+        height: '100%'
+      })
+
+      return { grid, canvas }
+    }
+
+
+    /**
+     * @public
+     */
+    resize() {
+      console.log('resize')
+      this.onResizeCallback()
+    }
+
+  createViewer (context) {
+    console.log("createViewer")
+     var layout = {
+        margin: {
+          t: 50,
+          r: 50,
+          b: 50,
+          l: 50
+        },
+     
+        showlegend: false,
+        with: 700,
+        height: 700,
+        autosize: false
+      };
+
+      const data = [{
+       z: [[0,0,0],[0,0,0],[0,0,0]],
+        type : 'heatmap', 
+      }
+      ];
+     Plotly.newPlot('myDiv', data , layout);
+}
+
+    createProxy (model) {
+      const [_, devname, name] = model.match(/^(.+)\/([A-Za-z0-9_]+)$/)
+      return new tangojs.core.api.AttributeProxy(devname, name)
+    }
+
+   readProxy (proxy) {
+      return proxy.read()
+    }
+
+
+    triggerUpdateDueToModelChange () {
+      this.proxy[this.model]
+        .get_info()
+        .then(i => this.updateDueToModelChange(i))
+    }
+
+    updateDueToModelChange (attributeInfo) {
+     
+    }
+
+    onModelError (error) {
+      console.error(error)
+      this.updateValueAndQuality('-error-',
+                                 tangojs.core.tango.AttrQuality.ATTR_INVALID)
+    }
+
+    updateValueAndQuality (value, quality) {
+   var layout = {
+        margin: {
+          t: 50,
+          r: 50,
+          b: 50,
+          l: 50
+        },
+     
+        showlegend: false,
+        with: 700,
+        height: 700,
+        autosize: false
+      };
+      console.log("VALUE = " + value);
+       
+ const data = [{
+       z: value,
+       type : 'heatmap', 
+      }
+      ];
+  Plotly.newPlot('myDiv' , data, layout);
+    }
+
+
+    onModelRead (deviceAttributes) {
+      console.log("onModelRead")
+     const attribute = deviceAttributes[this.model]
+      this.updateValueAndQuality(attribute.value, attribute.quality)
+      // envoyer deviceAttributes[model].value
+      // vers ton image viewer   
+
+    }
+
+
+  }
+
+  window.tangojs.web.util.mixins.withPolledModel.call(
+    TangoJsImageElement.prototype)
+
+  window.tangojs.web.util.mixins.withReflectedAttributes.call(
+    TangoJsImageElement.prototype,
+    {
+      model: {
+        type: 'string',
+        onChange: function (model) {
+          if (model) {
+            this.onModelChange(model)
+            this.triggerUpdateDueToModelChange()
+          }
+        }
+      },
+      pollPeriod: {
+        type: 'number',
+        defaultValue: 1000,
+        onChange: TangoJsImageElement.prototype.onPollPeriodChange
+      }
+    })
+
+  window.tangojs.web.util.registerComponent(
+    'tangojs-image',
+    TangoJsImageElement,
+    {
+      capabilities: {
+        attributeModel: true,
+        commandModel: false,
+        statusModel: false,
+        readOnlyModel: true
+      },
+      attributes: {
+        'model': { type: String },
+        'poll-period': { type: Number },
+      }
+    })
+
+})(window)
+
+</script>
+
+</html>
