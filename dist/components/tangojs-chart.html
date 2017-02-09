@@ -1,0 +1,225 @@
+<!DOCTYPE html>
+<html>
+<script type="text/javascript">
+(function(window) {
+    'use strict'
+
+    const document = window.document
+    const tangojs = window.tangojs
+
+    class SeededPrng {
+        constructor(seed) {
+            this._seed = seed
+        }
+         nextDouble() {
+            const x = Math.sin(this._seed++) * 10000
+                return x - Math.floor(x)
+        }
+    }
+
+    const prng = new SeededPrng(10)
+    const randcf = () => Math.round(prng.nextDouble() * 255)
+    const randomColor = () => `rgb(${randcf()},${randcf()},${randcf()})`
+
+    const timeFormat = 'HH:mm:ss'
+
+    const plotOptions = {
+        responsive: true,
+        maintainAspectRatio: false,
+        title: {
+            display: true
+        },
+        tooltips: {
+            enabled: true
+        },
+        animation: {
+            duration: 0 // the plot is unreadable with animation
+                // easing: 'easeOutBack'
+        },
+        scales: {
+            xAxes: [{
+                display: true,
+                type: 'linear',
+                position: 'bottom'
+            }],
+            yAxes: [{
+                id: 0,
+                display: true,
+                scaleLabel: {
+                    display: true,
+                    labelString: 'Axe 0'
+                }
+            },
+                {
+                id: 1,
+                position: 'right',
+                display: true,
+                scaleLabel: {
+                    display: true,
+                    labelString: 'Axe 1'
+                },
+            }]
+        }
+    }
+
+    class TangoJsChartElement extends window.HTMLElement {
+
+        createdCallback() {
+
+            this.root = this.createShadowRoot()
+            this.dom = this.createLocalDom()
+            this.root.appendChild(this.dom.grid)
+
+            this.plot = this.createPlot(this.dom.canvas.getContext('2d'))
+
+            this.onResizeCallback = () => {
+                this.plot.resize()
+            }
+
+            this.mutationObserver = new MutationObserver(this.onResizeCallback)
+            this.mutationObserver.observe(this, {
+                attributes: true
+            })
+
+            window.addEventListener('resize', this.onResizeCallback)
+        }
+
+        attachedCallback() {
+            this.onResizeCallback()
+        }
+
+        detachedCallback() {
+            this.mutationObserver.disconnect()
+        }
+
+        createLocalDom() {
+
+            const grid = document.createElement('div')
+            const canvas = document.createElement('canvas')
+            grid.appendChild(canvas)
+
+            Object.assign(this.style, {
+                display: 'flex',
+                flexDirection: 'column'
+            })
+
+            Object.assign(grid.style, {
+                flex: 1,
+                height: '100%'
+            })
+
+            return {
+                grid,
+                canvas
+            }
+        }
+
+        /**
+         * @public
+         */
+        resize() {
+            this.onResizeCallback()
+        }
+
+     createPlot (context) {
+        const data = {
+            datasets: [
+            {
+                data: [],
+                borderColor: randomColor(),
+                tension: 0.1
+            }]
+      };
+      const chart = new Chart(context, {
+        type: 'line',
+        data: data,
+        options: plotOptions
+      })
+      return chart
+    }
+
+        createProxy(model) {
+            const [_, devname, name] = model.match(/^(.+)\/([A-Za-z0-9_]+)$/)
+            return new tangojs.core.api.AttributeProxy(devname, name)
+        }
+
+        readProxy(proxy) {
+            return proxy.read()
+        }
+
+        onModelRead (deviceAttributes) {
+            Object.keys(deviceAttributes).forEach((model, i) => {
+                this.plot.data.datasets[i].label = model;
+                this.plot.data.datasets[i].data = deviceAttributes[model].value.map(function(value, index){return {x:index, y:value}});
+            })
+            this.plot.update()
+            
+        }
+    
+
+    recreateDatasets (modelArray) {
+      this.plot.data.datasets = modelArray.map((model,i) => {
+        return {
+          label: model,
+          data: [],
+          fill: false,
+          tension: 0.0,
+          // metaData: undefined, // Chart.js bug ?
+          borderColor: randomColor(),
+          yAxisID: i
+        }
+      })
+    }
+}
+    window.tangojs.web.util.mixins.withPolledModel.call(
+        TangoJsChartElement.prototype)
+
+    window.tangojs.web.util.mixins.withReflectedAttributes.call(
+        TangoJsChartElement.prototype, {
+            model: {
+                type: [Array, String],
+                onChange: function(model) {
+                    if (!model) {
+                        return
+                    }
+                    this.onModelChange(model)
+                    this.recreateDatasets(model)
+                }
+            },
+            pollPeriod: {
+                type: 'number',
+                defaultValue: 1000,
+                onChange: TangoJsChartElement.prototype.onPollPeriodChange
+            },
+            dataLimit: {
+                type: 'number',
+                defaultValue: 20
+            }
+        })
+
+    window.tangojs.web.util.registerComponent(
+        'tangojs-chart',
+        TangoJsChartElement, {
+            capabilities: {
+                attributeModel: true,
+                commandModel: false,
+                statusModel: false,
+                readOnlyModel: true
+            },
+            attributes: {
+                'model': {
+                    type: [Array, String]
+                },
+                'poll-period': {
+                    type: Number
+                },
+                'data-limit': {
+                    type: Number
+                }
+            }
+        })
+
+})(window)
+</script>
+
+</html>
