@@ -61,6 +61,8 @@ model (e.g. `AttributeInfo` object).
 * [tangojs-state-led](#led)
 * [tangojs-plot](#plot)
 * [tangojs-trend](#trend)
+* [tangojs-chart](#chart)
+* [tangojs-image](#image)
 * [tangojs-form](#form)
 * [tangojs-device-tree](#devicetree)
 
@@ -202,6 +204,41 @@ dependencies manually:
 <script src="node_modules/moment/min/moment.min.js"></script>
 <script src="node_modules/chart.js/Chart.min.js"></script>
 ```
+
+### Chart
+
+Visualizes spectrum attributes.
+
+#### Examples
+
+```html
+<tangojs-chart
+  model="sys/tg_test/1/long_spectrum,sys/tg_test/1/double_spectrum"
+  poll-period="1000">
+</tangojs-chart>
+```
+
+#### Attributes
+
+Property   | Type     | Attribute   | Remarks
+---------- | -------- | ----------- | -------
+model      | string[] | model       | Array of attribute names.
+pollPeriod | number   | poll-period | Poll period in milliseconds.
+
+#### Remarks
+
+`tangojs-spectrum` widget is built
+on top of [Chart.js](http://www.chartjs.org/). You have to include
+dependencies manually:
+
+```
+<script src="node_modules/moment/min/moment.min.js"></script>
+<script src="node_modules/chart.js/Chart.min.js"></script>
+```
+
+### Image
+
+[10-02-2017] @GregViguier and his team is currently working on this widget.
 
 ### Form
 

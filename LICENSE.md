@@ -1,6 +1,6 @@
 The MIT License (MIT)
 
-Copyright (c) 2015 Michal Liszcz
+Copyright (c) 2015-2017 [The Contributors](https://github.com/tangojs/tangojs-web-components/graphs/contributors)
 
 Permission is hereby granted, free of charge, to any person obtaining a copy
 of this software and associated documentation files (the "Software"), to deal
