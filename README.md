@@ -284,7 +284,14 @@ None.
 
 #### API
 
-* `getSelections(): Array<T>`,
+* `getSelections(): Array<T>`, where `T` is
+  ```
+  {
+    key: string,
+    path: Array<string>,
+    value: { model: string, info: (DeviceInfo|AttributeInfo|CommandInfo) }
+  }
+  ```
 * `clearSelections(): undefined`,
 * `collapse(): undefined`,
 * `collapseAt(level: Number)`,
