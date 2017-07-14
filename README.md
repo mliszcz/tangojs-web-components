@@ -155,7 +155,8 @@ Displays device state.
   model="my/dev/01"
   poll-period="1000"
   show-name
-  show-led>
+  show-led
+  show-value>
 </tangojs-state-led>
 ```
 
@@ -167,6 +168,7 @@ model      | string  | model       | Full device name.
 pollPeriod | number  | poll-period | Poll period in milliseconds.
 showName   | boolean | show-name   | Should display name.
 showLed    | boolean | show-led    | Should display led.
+showValue  | boolean | show-value  | Should display value as string.
 
 ### Plot
 

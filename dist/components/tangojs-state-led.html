@@ -98,6 +98,10 @@
     onShowNameChange (showName) {
       this.dom.name.style.visibility = showName ? 'visible' : 'hidden'
     }
+
+    onShowValueChange (showValue) {
+      this.dom.value.style.visibility = showValue ? 'visible' : 'hidden'
+    }
   }
 
   window.tangojs.web.util.mixins.withPolledModel.call(
@@ -128,6 +132,10 @@
       showName: {
         type: 'boolean',
         onChange: TangoJsStateLedElement.prototype.onShowNameChange
+      },
+      showValue: {
+        type: 'boolean',
+        onChange: TangoJsStateLedElement.prototype.onShowValueChange
       }
     })
 
@@ -145,7 +153,8 @@
         'model': { type: String },
         'poll-period': { type: Number },
         'show-name': { type: Boolean },
-        'show-led': { type: Boolean }
+        'show-led': { type: Boolean },
+        'show-value': { type: Boolean }
       }
     })
 
