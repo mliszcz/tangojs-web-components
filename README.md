@@ -78,7 +78,8 @@ constant rate.
   model="my/dev/01/attr01"
   poll-period="1000"
   show-name
-  show-unit>
+  show-unit
+  precision="3">
 </tangojs-label>
 ```
 
@@ -91,6 +92,7 @@ pollPeriod  | number  | poll-period  | Poll period in milliseconds.
 showName    | boolean | show-name    | Should display name.
 showUnit    | boolean | show-unit    | Should display unit.
 showQuality | boolean | show-quality | Should display quality led.
+precision   | number  | precision    | Number of decimal digits.
 
 ### LineEdit
 

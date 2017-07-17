@@ -97,6 +97,8 @@
 
     updateValueAndQuality (value, quality) {
       this.dom.led.color = this.getQualityLedColor(quality)
+      if(this.precision)
+        value = value.toFixed(this.precision)
       this.dom.value.textContent = value
     }
 
@@ -125,6 +127,10 @@
 
     onShowUnitChange (showUnit) {
       this.toggleVisibility(this.dom.unit, showUnit)
+    }
+
+    onPrecisionChange (precision) {
+      this.precision = precision
     }
 
   }
@@ -161,6 +167,10 @@
       showUnit: {
         type: 'boolean',
         onChange: TangoJsLabelElement.prototype.onShowUnitChange
+      },
+      precision: {
+        type: 'number',
+        onChange: TangoJsLabelElement.prototype.onPrecisionChange
       }
     })
 
@@ -179,7 +189,8 @@
         'poll-period': { type: Number },
         'show-quality': { type: Boolean },
         'show-name': { type: Boolean },
-        'show-unit': { type: Boolean }
+        'show-unit': { type: Boolean },
+        'precision': { type: Number }
       }
     })
 
