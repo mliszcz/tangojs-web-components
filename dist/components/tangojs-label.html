@@ -83,7 +83,7 @@
       this.dom.name.textContent = attributeInfo.name
       var unit = attributeInfo.display_unit
       if(unit === "No display unit")    // filter this, why it even works that way?
-        unit = ""
+        unit = attributeInfo.unit       // here, if no unit is set, proper empty string is returned
       this.dom.unit.textContent = unit
     }
 
