@@ -81,7 +81,10 @@
 
     updateDueToModelChange (attributeInfo) {
       this.dom.name.textContent = attributeInfo.name
-      this.dom.unit.textContent = attributeInfo.display_unit
+      var unit = attributeInfo.display_unit
+      if(unit === "No display unit")    // filter this, why it even works that way?
+        unit = ""
+      this.dom.unit.textContent = unit
     }
 
     onModelRead (deviceAttributes) {
