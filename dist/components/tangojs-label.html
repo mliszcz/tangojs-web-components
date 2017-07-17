@@ -9,14 +9,14 @@
 <template>
 
   <style>
-    #root {
+    /*#root {
       grid-template-columns: 1fr 1fr 1fr 30px 20px;
     }
     #name  { grid-column: 1; }
     #value { grid-column: 2; }
     #input { grid-column: 3; }
     #unit  { grid-column: 4; }
-    #led   { grid-column: 5; }
+    #led   { grid-column: 5; }*/
   </style>
 
   <div id="root" class="tangojs-form-row">
@@ -114,7 +114,8 @@
     }
 
     toggleVisibility (node, show) {
-      node.style.visibility = show ? 'visible' : 'hidden'
+      // node.style.visibility = show ? 'visible' : 'hidden'
+      node.style.display = show ? 'inline-block' : 'none'
     }
 
     onShowQualityChange (showQuality) {
