@@ -68,7 +68,10 @@
 
     updateName () {
       this.proxy[this.model].get_info().then(deviceInfo => {
-        this.dom.name.textContent = deviceInfo.name
+        var name = deviceInfo.name
+        if(this.only_name)
+          name = name.split("/")[2]
+        this.dom.name.textContent = name
       })
     }
 
@@ -101,6 +104,10 @@
 
     onShowValueChange (showValue) {
       this.dom.value.style.visibility = showValue ? 'visible' : 'hidden'
+    }
+
+    onOnlyNameChange (onlyName) {
+      this.only_name = onlyName
     }
   }
 
@@ -136,6 +143,10 @@
       showValue: {
         type: 'boolean',
         onChange: TangoJsStateLedElement.prototype.onShowValueChange
+      },
+      onlyName: {
+        type: 'boolean',
+        onChange: TangoJsStateLedElement.prototype.onOnlyNameChange
       }
     })
 
@@ -154,7 +165,8 @@
         'poll-period': { type: Number },
         'show-name': { type: Boolean },
         'show-led': { type: Boolean },
-        'show-value': { type: Boolean }
+        'show-value': { type: Boolean },
+        'only-name': { type: Boolean }
       }
     })
 

@@ -158,7 +158,8 @@ Displays device state.
   poll-period="1000"
   show-name
   show-led
-  show-value>
+  show-value
+  only-name>
 </tangojs-state-led>
 ```
 
@@ -171,6 +172,7 @@ pollPeriod | number  | poll-period | Poll period in milliseconds.
 showName   | boolean | show-name   | Should display name.
 showLed    | boolean | show-led    | Should display led.
 showValue  | boolean | show-value  | Should display value as string.
+onlyName   | boolean | only-name   | Show only device name, instead of full path.
 
 ### Plot
 
