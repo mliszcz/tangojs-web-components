@@ -65,6 +65,7 @@ model (e.g. `AttributeInfo` object).
 * [tangojs-image](#image)
 * [tangojs-form](#form)
 * [tangojs-device-tree](#devicetree)
+* [tangojs-group](#group)
 
 ### Label
 
@@ -280,6 +281,27 @@ Displays devices, attributes and commands stored in database.
 #### Attributes
 
 None.
+
+### Group
+
+Groups several attributes into one widget. Shows device name, state,
+attribute value and unit.
+
+#### Examples
+
+```html
+<tangojs-group
+  model="sys/tg_test/1/long_scalar,sys/tg_test/1/double_scalar"
+  name="Test group">
+</tangojs-group>
+```
+
+#### Attributes
+
+Property   | Type     | Attribute   | Remarks
+---------- | -------- | ----------- | -------
+model      | string[] | model       | Array of attribute names.
+name       | string   | name        | Group title.
 
 #### Events
 

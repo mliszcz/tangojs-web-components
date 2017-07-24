@@ -1,0 +1,131 @@
+<!DOCTYPE html>
+<html>
+	<link rel="import" href="tangojs-label.html">
+	<link rel="import" href="tangojs-state-led.html">
+
+	<template>
+		<style>
+			#tjs-container-root
+			{
+				border: 1px solid #9e9e9e;
+				border-radius: 15px;
+				overflow: hidden;
+				margin: 0px 7px 7px 7px;
+				break-inside: avoid;
+			}
+
+			#tjs-container-header
+			{
+				background: #c6c6c6;
+				border-bottom: 1px solid #9e9e9e;
+				padding: 0px 15px 0px 15px;
+			}
+
+			#tjs-container-content
+			{
+				padding: 0px 25px 0px 25px;
+			}
+
+			.device-row
+			{
+				padding-left: 10px;
+				width: 100%;
+			}
+
+			.device-col
+			{
+				margin: 0px;
+				padding: 0px;
+				max-width: 50%;
+				display: inline-block;
+			}
+
+			.dc1
+			{
+				margin-right: 10px !important;
+			}
+		</style>
+
+		<div id="tjs-container-root">
+			<div id="tjs-container-header">
+				<span id="tjs-container-name"></span>
+			</div>
+			<div id="tjs-container-content">
+			</div>
+		</div>
+	</template>
+
+	<script>
+		(
+			function(window)
+			{
+				'use strict'
+				const document = window.document
+				const currentScript = (document._currentScript || document.currentScript)
+				const template = currentScript.ownerDocument.querySelector("template")
+
+				class TangoJSGroupElement extends window.HTMLElement
+				{
+					createdCallback()
+					{
+						// Initialize HTML component ===========================
+						Object.defineProperty(this, "name",
+							{
+								get: () => this.getAttribute("name"),
+								set: v => this.setAttribute("name", v)
+							}
+						)
+						Object.defineProperty(this, "model",
+							{
+								get: () => this.getAttribute("model"),
+								set: v => this.setAttribute("model", v)
+							}
+						)
+	
+						this.root = this.createShadowRoot()
+						this.root.appendChild(document.importNode(template.content, true))
+
+						// Here proper content starts ==========================
+						this.root.querySelector("#tjs-container-name")
+							.textContent = this.name
+
+						var container = this.root.querySelector("#tjs-container-content")
+						this.model.split(",").forEach(model => {
+							var device = model.substr(0, model.lastIndexOf("/"))
+							container.appendChild(this.createDeviceRow(device, model))
+						})
+					}
+
+					createDeviceRow(device, attr)
+					{
+						var device_row = document.createElement("div")
+						device_row.className = "device-row"
+						var device_col1 = document.createElement("div")
+						var device_col2 = document.createElement("div")
+						device_col1.className = "device-col dc1"
+						device_col2.className = "device-col"
+						var state_led = document.createElement("tangojs-state-led")
+						var label = document.createElement("tangojs-label")
+						state_led.setAttribute("model", device)
+						state_led.setAttribute("show-led", true)
+						state_led.setAttribute("show-name", true)
+						state_led.setAttribute("only-name", true)
+						label.setAttribute("model", attr)
+						label.setAttribute("precision", 3)
+						label.setAttribute("show-unit", true)
+						device_col1.appendChild(state_led)
+						device_col2.appendChild(label)
+						device_row.appendChild(device_col1)
+						device_row.appendChild(device_col2)
+						return device_row
+					}
+				}
+
+				document.registerElement("tangojs-group",
+					{ prototype: TangoJSGroupElement.prototype }
+				)
+			}
+		)(window)
+	</script>
+
+</html>
