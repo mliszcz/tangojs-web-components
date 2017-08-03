@@ -282,27 +282,6 @@ Displays devices, attributes and commands stored in database.
 
 None.
 
-### Group
-
-Groups several attributes into one widget. Shows device name, state,
-attribute value and unit.
-
-#### Examples
-
-```html
-<tangojs-group
-  model="sys/tg_test/1/long_scalar,sys/tg_test/1/double_scalar"
-  name="Test group">
-</tangojs-group>
-```
-
-#### Attributes
-
-Property   | Type     | Attribute   | Remarks
----------- | -------- | ----------- | -------
-model      | string[] | model       | Array of attribute names.
-name       | string   | name        | Group title.
-
 #### Events
 
 * `selected` - fires when element is selected (checked)
@@ -324,3 +303,24 @@ name       | string   | name        | Group title.
 * `collapse(): undefined`,
 * `collapseAt(level: Number)`,
 * `expand(): undefined`.
+
+### Group
+
+Groups several attributes into one widget. Shows device name, state,
+attribute value and unit.
+
+#### Examples
+
+```html
+<tangojs-group
+  model="sys/tg_test/1/long_scalar,sys/tg_test/1/double_scalar"
+  name="Test group">
+</tangojs-group>
+```
+
+#### Attributes
+
+Property   | Type     | Attribute   | Remarks
+---------- | -------- | ----------- | -------
+model      | string[] | model       | Array of attribute names.
+name       | string   | name        | Group title.
