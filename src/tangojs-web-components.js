@@ -1,3 +1,4 @@
+import withTangoAttribute from './util/mixins/withTangoAttribute'
 import withPolledModel from './util/mixins/withPolledModel'
 import withReflectedAttribute from './util/mixins/withReflectedAttribute'
 import withReflectedAttributes from './util/mixins/withReflectedAttributes'
@@ -21,6 +22,7 @@ export const util = Object.assign(
   { converters },
   {
     mixins: {
+      withTangoAttribute,
       withPolledModel,
       withReflectedAttribute,
       withReflectedAttributes
