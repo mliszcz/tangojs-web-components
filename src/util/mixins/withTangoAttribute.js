@@ -39,7 +39,6 @@ export default function (superClass) {
       }
       const timer = Symbol.for('timer')
       
-      //const proxy = Symbol.for('proxy')
     }
 
     
@@ -54,8 +53,9 @@ export default function (superClass) {
 	  type: String,
 	  observer: 'onModelChange'
 	},
-	pollperiod: {
+	pollPeriod: {
 	  type: Number,
+	  value: 1000,
 	  observer: 'onPollPeriodChange'
 	}
       };
@@ -63,6 +63,7 @@ export default function (superClass) {
 
     onModelChange(model, oldValue) {
       if (model) {
+	console.log('model changed '+model)
         this._setProxy(
 	  (Array.isArray(model) ? model : [model])
             .reduce((p, m) => (p[m] = this.createProxy(m), p), {})
@@ -75,12 +76,31 @@ export default function (superClass) {
 
     onPollPeriodChange(newValue, oldValue) {
       if (this.proxy) {
+	console.log('poll period changed '+newValue)
         this.restartPollingTimer()
       }
     }
 
-    restartPollingTimer() {
+    createProxy(model) {
+      const [_, devname, name] = model.match(/^(.+)\/([A-Za-z0-9_]+)$/)
+      console.log('creating a proxy')
+      return new tangojs.core.api.AttributeProxy(devname, name)
+    }
 
+    readProxy(proxy) {
+      console.log('reading a proxy. argument: '+proxy+', this.proxy '+this.proxy)
+      return proxy.read()
+    }
+
+    onModelRead (deviceAttributes) {
+      const attribute = deviceAttributes[this.model];
+      this.attribute = attribute.value;
+      this.attributeValue = attribute.value;
+    }
+
+	  
+    restartPollingTimer() {
+      console.log('restartPolling with period '+this.pollPeriod)
       this.stopPollingTimer()
 
       this.timer = setInterval(() => {
