@@ -29,18 +29,24 @@ export default function (superClass) {
       };
     }
 
-    onModelChange(model) {
+    createProxy(model) {
       const [_, devname, name] = model.match(/^(.+)\/([A-Za-z0-9_]+)$/)
       console.log('creating a proxy')
-      this._setProxy( new tangojs.core.api.CommandProxy(devname, name))
-      // update the info
-      // Probably to refactor
-      this.proxy.get_info().then(i => this._setInfo(i))
+      return new tangojs.core.api.CommandProxy(devname, name)
+    }
+
+    proxyChanged(proxy){
+      this.proxy[this.model].get_info().then(i => this._setInfo(i))
+    }
+
+    infoChanged(info) { 
+      this.name = info.cmd_name
     }
 
     execute(event){
       const devDataIn = new tangojs.core.api.DeviceData(this.arguments)
-      this.proxy.inout(devDataIn).then(devDataOut => {
+      console.log('command proxy:'+this.proxy)
+      this.proxy[this.model].inout(devDataIn).then(devDataOut => {
 	// What to do?
 	//this.dispatchEvent(new CommandButtonResultEvent(devDataOut))
       })
@@ -48,8 +54,4 @@ export default function (superClass) {
 
   }
 }
-
-
-
-
 
