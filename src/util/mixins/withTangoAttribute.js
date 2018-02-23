@@ -1,4 +1,4 @@
-
+import withTango from "./withTango"
 /**
  * Adds support for periodically polled model(s).
  *
@@ -16,59 +16,44 @@
  * - restartPollingTimer {function(): undefined}
  */
 export default function (superClass) {
-  return class extends superClass {
+  return class extends withTango(superClass) {
     constructor() {
       super();
 
-      if (!this.createProxy) {
-        console.warn('Mixing prototype lacks \'createProxy\' method.')
-      }
-
-      if (!this.readProxy) {
-        console.warn('Mixing prototype lacks \'readProxy\' method.')
-      }
-
-      if (!this.onModelRead) {
-        this.onModelRead = function () {}
-      }
-
-      if (!this.onModelError) {
-        this.onModelError = function (error) {
-          console.error(error)
-        }
-      }
       const timer = Symbol.for('timer')
       
     }
 
-    
-
     static get properties() {
       return {
-	proxy: {
-          type: Object,
-	  readOnly: true,
-        },
-	model: {
-	  type: String,
-	  observer: 'onModelChange'
-	},
 	pollPeriod: {
 	  type: Number,
 	  value: 1000,
 	  observer: 'onPollPeriodChange'
-	}
+	},
+        showQuality: {
+          type: 'boolean',
+          observer: 'showQualityChanged'
+        },
+        showName: {
+          type: 'boolean',
+          observer: 'showNameChanged'
+        },
+        showUnit: {
+          type: 'boolean',
+          observer: 'showUnitChanged'
+        },
+        precision: {
+          type: 'number',
+          observer: 'precisionChanged'
+        }
       };
     }
 
-    onModelChange(model, oldValue) {
-      if (model) {
-	console.log('model changed '+model)
-        this._setProxy(
-	  (Array.isArray(model) ? model : [model])
-            .reduce((p, m) => (p[m] = this.createProxy(m), p), {})
-	)
+    proxyChanged(proxy){
+      if (proxy){
         this.restartPollingTimer()
+
       } else {
         this.stopPollingTimer()
       }
@@ -80,22 +65,43 @@ export default function (superClass) {
         this.restartPollingTimer()
       }
     }
-
+    
     createProxy(model) {
       const [_, devname, name] = model.match(/^(.+)\/([A-Za-z0-9_]+)$/)
       console.log('creating a proxy')
-      return new tangojs.core.api.AttributeProxy(devname, name)
+      const proxy =  new tangojs.core.api.AttributeProxy(devname, name)
+      // update the info
+      // Probably to refactor
+      proxy.get_info().then(i => this._setInfo(i))
+      return proxy
+    }
+
+    infoChanged(info) { 
+      var unit = info.display_unit 
+      if(unit === "No display unit") {
+        // filter this, why it even works that way? 
+        // here, if no unit is set, proper empty string is returned 
+        this.unit = info.unit
+
+      } else {
+	this.unit = unit
+      }
     }
 
     readProxy(proxy) {
-      console.log('reading a proxy. argument: '+proxy+', this.proxy '+this.proxy)
+      console.log('reading a proxy.')
       return proxy.read()
     }
 
     onModelRead (deviceAttributes) {
       const attribute = deviceAttributes[this.model];
-      this.attribute = attribute.value;
-      this.attributeValue = attribute.value;
+      this.attribute = attribute;
+      this.updateValueAndQuality(attribute.value, attribute.quality)
+    }
+
+    onModelError(error) {
+      console.error(error)
+      this.updateValueAndQuality('-error-', tangojs.core.tango.AttrQuality.ATTR_INVALID)
     }
 
 	  
@@ -124,5 +130,44 @@ export default function (superClass) {
     stopPollingTimer() {
       clearInterval(this.timer)
     }
+
+    updateValueAndQuality (value, quality) {
+      this.qualityColor = this.getQualityColor(quality)
+      if(this.precision)
+        this.value = value.toFixed(this.precision)
+    }
+
+    getQualityColor (quality) {
+      switch (quality) {
+        case tangojs.core.tango.AttrQuality.ATTR_VALID: return '#80FF00'
+        case tangojs.core.tango.AttrQuality.ATTR_INVALID: return '#880088'
+        case tangojs.core.tango.AttrQuality.ATTR_ALARM: return '#FF0000'
+        case tangojs.core.tango.AttrQuality.ATTR_CHANGING: return '#0080FF'
+        case tangojs.core.tango.AttrQuality.ATTR_WARNING: return '#FFFF00'
+        default: return '#0000FF'
+      }
+    }
+
+    toggleVisibility (node, show) {
+      // node.style.visibility = show ? 'visible' : 'hidden'
+      node.style.display = show ? 'inline-block' : 'none'
+    }
+
+    onShowQualityChange (showQuality) {
+      this.toggleVisibility(this.dom.led, showQuality)
+    }
+
+    onShowNameChange (showName) {
+      this.toggleVisibility(this.dom.name, showName)
+    }
+
+    onShowUnitChange (showUnit) {
+      this.toggleVisibility(this.dom.unit, showUnit)
+    }
+
+    onPrecisionChange (precision) {
+      this.precision = precision
+    }
+
   }
 }
