@@ -133,8 +133,11 @@ export default function (superClass) {
 
     updateValueAndQuality (value, quality) {
       this.qualityColor = this.getQualityColor(quality)
-      if(this.precision)
+      if(this.precision){
         this.value = value.toFixed(this.precision)
+      } else {
+        this.value = value
+      }
     }
 
     getQualityColor (quality) {
