@@ -86,17 +86,26 @@ export default function (superClass) {
       } else {
 	this.unit = unit
       }
+
+      this.writable = info.writable
+
+      this.updateInputType(info)
     }
 
+    /*
+     *  READING Function
+     *
+     */
+
     readProxy(proxy) {
-      console.log('reading a proxy.')
+      //console.log('reading a proxy.')
       return proxy.read()
     }
 
     onModelRead (deviceAttributes) {
       const attribute = deviceAttributes[this.model];
       this.attribute = attribute;
-      this.updateValueAndQuality(attribute.value, attribute.quality)
+      this.updateValue(attribute)
     }
 
     onModelError(error) {
@@ -131,12 +140,15 @@ export default function (superClass) {
       clearInterval(this.timer)
     }
 
-    updateValueAndQuality (value, quality) {
-      this.qualityColor = this.getQualityColor(quality)
+    updateValue(data) {
+      this.qualityColor = this.getQualityColor(data.quality)
       if(this.precision){
-        this.value = value.toFixed(this.precision)
+        this.value = data.value.toFixed(this.precision)
       } else {
-        this.value = value
+        this.value = data.value
+      }
+      if(this.writable){
+	this.setPoint = data.w_value
       }
     }
 
@@ -172,5 +184,79 @@ export default function (superClass) {
       this.precision = precision
     }
 
+    /*
+     * WRITING FUNCTION
+     * 
+     */
+
+    write(e){
+      if (e.keyCode == 13 || e.which == 13) {
+        const t = e.target
+        const deviceAttribute = new tangojs.core.api.DeviceAttribute({
+          value: (t.type == 'checkbox' ? t.checked : t.value)
+        })
+
+        this.proxy[this.model]
+          .write(deviceAttribute)
+          .catch(e => console.error(e))
+
+        e.preventDefault();
+      }
+    }
+
+    updateInputType(info){
+      this.inputType = this.getInputTypeFromAttributeInfo(info)
+
+      if (info.data_format != window.tangojs.core.tango.AttrDataFormat.SCALAR) {
+        console.warn(`Unsupported data format ${info.data_format}.`)
+        this.writable = false
+      }
+    }
+
+    getInputTypeFromAttributeInfo (info) {
+      const DT = window.tangojs.core.tango.AttributeDataType
+
+      switch (info.data_type) {
+        case DT.ATT_BOOL.value: return 'checkbox'
+        case DT.ATT_SHORT.value:
+        case DT.ATT_LONG.value:
+        case DT.ATT_LONG64.value:
+        case DT.ATT_FLOAT.value:
+        case DT.ATT_DOUBLE.value:
+        case DT.ATT_UCHAR.value:
+        case DT.ATT_USHORT.value:
+        case DT.ATT_ULONG.value:
+        case DT.ATT_ULONG64.value: return 'number'
+        case DT.ATT_STRING.value: return 'text'
+        case DT.ATT_STATE.value:
+        case DT.DEVICE_STATE.value:
+        case DT.ATT_ENCODED.value:
+        case DT.ATT_NO_DATA.value:
+        default: return undefined
+      }
+    }
+
+    setWriteProxy(info){
+      // TODO: Move to TangoJS.core.AttributeProxy
+      const { READ, WRITE, READ_WRITE, READ_WITH_WRITE } =
+        window.tangojs.core.tango.AttrWriteType
+
+      const [_, devname, name] = this.model.match(/^(.+)\/([A-Za-z0-9_]+)$/)
+
+      switch (attributeInfo.writable) {
+        case READ:
+          this.writeProxy = null
+          break
+        case WRITE:
+        case READ_WRITE:
+          this.writeProxy = this.proxy
+          break
+        case READ_WITH_WRITE:
+          this.writeProxy = new window.tangojs.core.api.AttributeProxy(
+            this.proxy.devicename,
+            attributeInfo.writable_attr_name)
+          break
+      }
+    }
   }
 }
