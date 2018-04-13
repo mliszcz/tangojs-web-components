@@ -1,6 +1,3 @@
-import withTango from './util/mixins/withTango'
-import withTangoAttribute from './util/mixins/withTangoAttribute'
-import withTangoCommand from './util/mixins/withTangoCommand'
 import withPolledModel from './util/mixins/withPolledModel'
 import withReflectedAttribute from './util/mixins/withReflectedAttribute'
 import withReflectedAttributes from './util/mixins/withReflectedAttributes'
@@ -13,6 +10,7 @@ import * as fn from './util/fn'
  */
 export const components = { }
 
+
 /**
  * Utility functions for components
  */
@@ -23,9 +21,6 @@ export const util = Object.assign(
   { converters },
   {
     mixins: {
-      withTango,
-      withTangoAttribute,
-      withTangoCommand,
       withPolledModel,
       withReflectedAttribute,
       withReflectedAttributes
