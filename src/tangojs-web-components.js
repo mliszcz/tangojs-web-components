@@ -1,4 +1,5 @@
 import withTango from './util/mixins/withTango'
+import withTangoDevice from './util/mixins/withTangoDevice'
 import withTangoAttribute from './util/mixins/withTangoAttribute'
 import withTangoCommand from './util/mixins/withTangoCommand'
 import withPolledModel from './util/mixins/withPolledModel'
@@ -24,6 +25,7 @@ export const util = Object.assign(
   {
     mixins: {
       withTango,
+      withTangoDevice,
       withTangoAttribute,
       withTangoCommand,
       withPolledModel,

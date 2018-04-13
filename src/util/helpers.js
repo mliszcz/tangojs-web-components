@@ -35,17 +35,17 @@ export function registerComponent (tagName,
                                    constructor,
                                    descriptor) {
 
-  //const registeredConstructor = window.document.registerElement(tagName, {
-  //  prototype: constructor.prototype
-  //})
+  const registeredConstructor = window.document.registerElement(tagName, {
+    prototype: constructor.prototype
+  })
 
-  //Object.defineProperty(registeredConstructor, 'descriptor', {
-  //  value: descriptor ? Object.assign({}, descriptor, { tagName }) : undefined
-  //})
+  Object.defineProperty(registeredConstructor, 'descriptor', {
+    value: descriptor ? Object.assign({}, descriptor, { tagName }) : undefined
+  })
 
-  //components[constructor.name] = registeredConstructor
+  components[constructor.name] = registeredConstructor
 
-  //return registeredConstructor
+  return registeredConstructor
 }
 
 /**
